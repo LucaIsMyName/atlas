@@ -1,6 +1,6 @@
 {
   "name": "atlas",
-  "version": "0.0.001",
+  "version": "0.0.002",
   "description": "a web browser",
   "main": "./src/main/main.js",
   "type": "module",
