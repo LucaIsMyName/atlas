@@ -1,0 +1,167 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root{
+  --foreground: #1e1e1e;
+  --foreground-secondary: #2d2d2d;
+  --foreground-tertiary: #3a3a3a;
+  --foreground-quaternary: #4a4a4a;
+  --foreground-light: #5a5a5a;
+  --background: #ebebeb;
+  --background-secondary: #c6c6c6;
+  --background-tertiary: #979797;
+  --background-quaternary: #6a6a6a;
+  --background-light: #4a4a4a;
+} 
+
+.dark {
+  --background: #1e1e1e;
+  --background-secondary: #2d2d2d;
+  --background-tertiary: #3a3a3a;
+  --background-quaternary: #4a4a4a;
+  --background-light: #5a5a5a;
+  --foreground: #e6e6e6;
+  --foreground-secondary: #c3c3c3;
+  --foreground-tertiary: #aaaaaa;
+  --foreground-quaternary: #6a6a6a;
+  --foreground-light: #4a4a4a;
+}
+
+webview {
+  display: inline-flex !important;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+}
+
+input[type="color"] {
+  -webkit-appearance: none;
+  border: none;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  display: block;
+  cursor: pointer;
+}
+
+
+/** dark mode */
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --w-rjv-key-string: #93c9ff;
+    --w-rjv-type-string-color: #ffcc66;
+    --w-rjv-curlybraces-color: #d4d4d4;
+    --w-rjv-quotes-string-color: #9d9d9d;
+    --w-rjv-quotes-color: #9d9d9d;
+    --w-rjv-arrow-color: #d4d4d4;
+  }
+
+  ::selection {
+    background-color: #ab9cff;
+    color: #000;
+  }
+  
+  .cm-gutters {
+    background-color: transparent !important;
+  }
+  .cm-activeLine {
+    background-color: #73737348 !important;
+  }
+  .cm-editor {
+    background-color: transparent !important ;
+  }
+  .ͼf {
+    color: #eff2d0;
+  }
+
+  .ͼk {
+    color: #66fcff;
+  }
+  .ͼh {
+    color: #ff66f0;
+  }
+  .ͼj {
+    color: #ffcc66;
+  }
+  .ͼm {
+    color: #93c9ff;
+  }
+  .ͼe {
+    color: #ff8b8b;
+  }
+  .ͼc {
+    color: #c3e88d;
+  }
+
+  .ͼd {
+    color: #ffcc66;
+  }
+  .cm-editor .cm-line {
+    color: #d4d4d4 !important;
+  }
+
+  .cm-editor .cm-keyword {
+    color: #569cd6 !important;
+  }
+
+  .cm-editor .cm-atom {
+    color: #d4d4d4 !important;
+  }
+
+  .cm-editor .cm-number {
+    color: #b5cea8 !important;
+  }
+
+  .cm-editor .cm-def {
+    color: #d4d4d4 !important;
+  }
+
+  .cm-editor .cm-variable {
+    color: #9b859d !important;
+  }
+
+  .cm-editor .cm-variable-2 {
+    color: #9b859d !important;
+  }
+
+  .cm-editor .cm-variable-3 {
+    color: #9b859d !important;
+  }
+
+  .cm-editor .cm-property {
+    color: #9b859d !important;
+  }
+
+  .cm-editor .cm-operator {
+    color: #d4d4d4 !important;
+  }
+
+  .cm-editor .cm-comment {
+    color: #6a9955 !important;
+  }
+
+  .cm-editor .cm-string {
+    color: #ce9178 !important;
+  }
+
+
+}
+
+.tippy-box {
+  z-index: 9999;
+  padding: 0;
+  margin: 0;
+}
+
+.h-screen {
+  height: 100vh;
+  overflow: hidden;
+}
+
+.flex-1 {
+  flex: 1 1 0%;
+  min-height: 0;
+}
