@@ -4,49 +4,29 @@ import { getFaviconUrl } from "../utils/urlHelpers";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { FreeMode } from "swiper/modules";
 import { STYLE } from "../../config";
+import WindowControls from "./WindowControls";
 
 // Import Swiper styles
 import "swiper/css";
 import "swiper/css/free-mode";
+import BrowserControls from "./BrowserControls";
 
 const TopBar = ({ tabs, activeTabId, urlInput, onUrlSubmit, onUrlChange, onNewTab, onCloseTab, onTabClick, onSettingsOpen }) => {
+  const handleWindowControl = (action: "minimize" | "maximize" | "close") => {
+    if (window.electronAPI?.windowControls?.[action]) {
+      window.electronAPI.windowControls[action]();
+    }
+  };
   return (
     <div
       className="h-14 flex items-center justify-between px-4 bg-background w-full"
       style={{ WebkitAppRegion: "drag", WebkitUserSelect: "none" }}>
       {/* Left Section */}
       <section className="flex items-center flex-shrink-0">
-        <div
-          className="flex items-center space-x-2 mr-4"
-          style={{ WebkitAppRegion: "no-drag" }}>
-          <button
-            onClick={() => window.electronAPI.windowControls.close()}
-            className="w-3 h-3 rounded-full bg-red-500 hover:bg-red-600"
-          />
-          <button
-            onClick={() => window.electronAPI.windowControls.minimize()}
-            className="w-3 h-3 rounded-full bg-yellow-500 hover:bg-yellow-600"
-          />
-          <button
-            onClick={() => window.electronAPI.windowControls.maximize()}
-            className="w-3 h-3 rounded-full bg-green-500 hover:bg-green-600"
-          />
-        </div>
+        <WindowControls />
 
         {/* Navigation Controls */}
-        <div
-          className="flex items-center space-x-1 mr-2"
-          style={{ WebkitAppRegion: "no-drag" }}>
-          <button className="p-1 text-foreground-secondary hover:text-foreground hover:bg-background-secondary">
-            <ArrowLeft className="w-4 h-4" />
-          </button>
-          <button className="p-1 text-foreground-secondary hover:text-foreground hover:bg-background-secondary">
-            <ArrowRight className="w-4 h-4" />
-          </button>
-          <button className="p-1 text-foreground-secondary hover:text-foreground hover:bg-background-secondary">
-            <RefreshCw className="w-4 h-4" />
-          </button>
-        </div>
+        <BrowserControls />
 
         {/* URL Input */}
         <div
@@ -58,9 +38,10 @@ const TopBar = ({ tabs, activeTabId, urlInput, onUrlSubmit, onUrlChange, onNewTa
             className="flex-1">
             <input
               type="text"
+              onClick={(e) => e.target.select()}
               value={urlInput}
               onChange={(e) => onUrlChange(e.target.value)}
-              className="w-full bg-transparent border-none outline-none text-sm text-foreground-secondary"
+              className="w-full bg-transparent border-none outline-none text-sm text-foreground truncate"
               placeholder="Search or enter URL"
             />
           </form>
@@ -69,7 +50,9 @@ const TopBar = ({ tabs, activeTabId, urlInput, onUrlSubmit, onUrlChange, onNewTa
 
       {/* Tabs Section with Swiper */}
       <section className="flex-1 flex items-center min-w-0">
-        <div className="flex-1 min-w-0" style={{ WebkitAppRegion: "no-drag" }}>
+        <div
+          className="flex-1 min-w-0"
+          style={{ WebkitAppRegion: "no-drag" }}>
           <Swiper
             modules={[FreeMode]}
             slidesPerView="auto"
@@ -95,15 +78,13 @@ const TopBar = ({ tabs, activeTabId, urlInput, onUrlSubmit, onUrlChange, onNewTa
                         <img
                           src={getFaviconUrl(tab.url)}
                           className="w-4 h-4"
-                          onError={(e) => { e.target.style.display = 'none' }}
+                          onError={(e) => {
+                            e.target.style.display = "none";
+                          }}
                         />
                       )}
                     </div>
-                    <span className="truncate text-sm">
-                      {tab.isLoading ? 
-                        <span className="text-foreground/30">Loading...</span> 
-                        : tab.title || "New Tab"}
-                    </span>
+                    <span className="truncate text-sm">{tab.isLoading ? <span className="text-foreground/30">Loading...</span> : tab.title || "New Tab"}</span>
                   </div>
                   <button
                     onClick={(e) => onCloseTab(tab.id, e)}
@@ -117,10 +98,9 @@ const TopBar = ({ tabs, activeTabId, urlInput, onUrlSubmit, onUrlChange, onNewTa
         </div>
 
         {/* Action Buttons */}
-        <div 
-          className="flex items-center ml-2 flex-shrink-0" 
-          style={{ WebkitAppRegion: "no-drag" }}
-        >
+        <div
+          className="flex items-center ml-2 flex-shrink-0"
+          style={{ WebkitAppRegion: "no-drag" }}>
           <button
             onClick={onNewTab}
             className="p-1 hover:bg-background-secondary rounded text-foreground-secondary">

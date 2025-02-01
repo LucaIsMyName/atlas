@@ -9,17 +9,17 @@
   --foreground-quaternary: #4a4a4a;
   --foreground-light: #5a5a5a;
   --background: #ebebeb;
-  --background-secondary: #c6c6c6;
-  --background-tertiary: #979797;
-  --background-quaternary: #6a6a6a;
+  --background-secondary: #d9d9d9;
+  --background-tertiary: #c4c4c4;
+  --background-quaternary: #9a9a9a;
   --background-light: #4a4a4a;
 } 
 
 .dark {
-  --background: #1e1e1e;
-  --background-secondary: #2d2d2d;
-  --background-tertiary: #3a3a3a;
-  --background-quaternary: #4a4a4a;
+  --background: #1a1a1a;
+  --background-secondary: #272727;
+  --background-tertiary: #343434;
+  --background-quaternary: #474747;
   --background-light: #5a5a5a;
   --foreground: #e6e6e6;
   --foreground-secondary: #c3c3c3;

@@ -2,9 +2,11 @@ appId: "com.atlas.app"
 productName: "atlas"
 directories:
   output: "release/${version}"
+  buildResources: "build"
 files:
   - "dist/**/*"
-  - "node_modules/**/*"
+  - "package.json"
+  - "!dist/**/*.map"
 mac:
   artifactName: "${productName}_${version}.${ext}"
   target: 

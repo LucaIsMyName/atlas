@@ -1,19 +1,19 @@
+import { app, BrowserWindow, ipcMain, dialog } from 'electron';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import isDev from 'electron-is-dev';
+import { promises as fs } from 'fs';
 
-import { app, BrowserWindow, ipcMain, dialog } from 'electron'
-import path from 'path'
-import { fileURLToPath } from 'url'
-import isDev from 'electron-is-dev'
-import fs from 'fs/promises'
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
-
-async function createWindow() {
+function createWindow() {
   const mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
-    frame: false, // Remove default window frame
-    titleBarStyle: "hidden",
+    frame: false,
+    titleBarStyle: 'hidden',
+    titleBarOverlay: false,
     title: 'Atlas Browser',
     webPreferences: {
       nodeIntegration: false,
@@ -24,27 +24,24 @@ async function createWindow() {
       allowRunningInsecureContent: false
     },
   });
-  
+
+  if (process.platform === 'darwin') {
+    mainWindow.setWindowButtonVisibility(false);
+  }
 
   if (isDev) {
     try {
-      await mainWindow.loadURL('http://localhost:5174')
-      mainWindow.webContents.openDevTools()
+      mainWindow.loadURL('http://localhost:5175');
+      mainWindow.webContents.openDevTools();
     } catch (e) {
-      console.error('Failed to load on port 5174, trying 5173...', e)
-      try {
-        await mainWindow.loadURL('http://localhost:5173')
-        mainWindow.webContents.openDevTools()
-      } catch (e) {
-        console.error('Failed to load development server', e)
-      }
+      console.error('Failed to load dev server:', e);
     }
   } else {
-    mainWindow.loadFile(path.join(__dirname, '../dist/index.html'))
+    mainWindow.loadFile(path.join(__dirname, '../index.html'));
   }
 }
 
-app.whenReady().then(createWindow)
+app.whenReady().then(createWindow);
 
 // Handle file dialog
 ipcMain.handle('show-file-dialog', async () => {
@@ -97,6 +94,7 @@ ipcMain.handle('window-maximize', () => {
 });
 
 ipcMain.handle('window-close', () => {
+  console.log('Main: close called');
   const win = BrowserWindow.getFocusedWindow();
   if (win) win.close();
 });

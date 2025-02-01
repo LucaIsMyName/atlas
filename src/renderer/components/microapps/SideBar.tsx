@@ -2,27 +2,23 @@ import React from "react";
 import { Plus, X, Settings, Loader2, Search } from "lucide-react";
 import { getFaviconUrl } from "../utils/urlHelpers";
 import Tab from "./Tab";
+import { ArrowRight, ArrowLeft, RefreshCw } from "lucide-react";
 import { STYLE } from "../../config";
+import WindowControls from "./WindowControls";
+import BrowserControls from "./BrowserControls";
 
 const SideBar = ({ tabs, activeTabId, urlInput, onUrlSubmit, onUrlChange, onNewTab, onCloseTab, onTabClick, onSettingsOpen }) => {
+  const handleWindowControl = (action: "minimize" | "maximize" | "close") => {
+    if (window.electronAPI?.windowControls?.[action]) {
+      window.electronAPI.windowControls[action]();
+    }
+  };
   return (
     <div className="w-64 h-full bg-background flex flex-col ">
-      <div className="w-64 p-4 pb-0">
-        <div
-          className="flex items-center space-x-2"
-          style={{ WebkitAppRegion: "no-drag" }}>
-          <button
-            onClick={() => window.electronAPI.windowControls.close()}
-            className="w-3 h-3 size-3 rounded-full bg-red-500 hover:bg-red-600"
-          />
-          <button
-            onClick={() => window.electronAPI.windowControls.minimize()}
-            className="w-3 h-3 size-3 rounded-full bg-yellow-500 hover:bg-yellow-600"
-          />
-          <button
-            onClick={() => window.electronAPI.windowControls.maximize()}
-            className="w-3 h-3 size-3 rounded-full bg-green-500 hover:bg-green-600"
-          />
+      <div className="w-64 p-4 pr-0 pb-0">
+        <div className="flex items-center justify-between">
+          <WindowControls />
+          <BrowserControls />
         </div>
         <div className="mt-4">
           <div className="flex items-center gap-2 py-1.5 bg-background-primary rounded">
@@ -33,8 +29,9 @@ const SideBar = ({ tabs, activeTabId, urlInput, onUrlSubmit, onUrlChange, onNewT
               <input
                 type="text"
                 value={urlInput}
+                onClick={(e) => e.target.select()}
                 onChange={(e) => onUrlChange(e.target.value)}
-                className="bg-transparent border-none outline-none text-sm text-foreground-primary truncate"
+                className="w-full bg-transparent border-none outline-none text-sm text-foreground truncate"
                 placeholder="Search or enter URL"
               />
             </form>
@@ -74,7 +71,7 @@ const SideBar = ({ tabs, activeTabId, urlInput, onUrlSubmit, onUrlChange, onNewT
       </div>
 
       {/* New Tab Button & Settings */}
-      <div className="p-2 border-t border-background-secondary flex items-center justify-between gap-4">
+      <div className="p-2 flex items-center justify-between gap-4">
         <button
           onClick={onNewTab}
           className="flex text-left w-full items-center gap-2 px-3 rounded border border-foreground-secondary shadow py-2 w-full rounded hover:bg-background-primary/50 text-foreground-secondary">

@@ -2,13 +2,14 @@
   "name": "atlas",
   "version": "0.0.001",
   "description": "a web browser",
+  "main": "./src/main/main.js",
   "type": "module",
-  "main": "src/main/main.js",
   "scripts": {
-    "start": "concurrently -k \"cross-env BROWSER=none npm run dev\" \"cross-env NODE_ENV=development npm run electron\"",
+    "start": "concurrently -k \"cross-env BROWSER=none npm run dev\" \"wait-on tcp:5175 && cross-env NODE_ENV=development electron .\"",
     "dev": "vite",
-    "electron": "wait-on tcp:5174 && electron .",
-    "build": "vite build",
+    "electron": "electron .",
+    "build": "vite build && npm run build:electron",
+    "build:electron": "mkdir -p dist/main && cp -r src/main/* dist/main/",
     "preview": "vite preview",
     "binary": "electron-builder"
   },

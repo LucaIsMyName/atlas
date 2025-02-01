@@ -190,18 +190,18 @@ const InAppBrowser = () => {
           <div className="flex-1 w-full">
             {/* Window Controls for Sidebar Layout */}
             <div
-              className=" flex flex-1 w-full items-center px-3 bg-background"
+              className=" flex flex-1 w-full items-center px-3"
               style={{ WebkitAppRegion: 'drag' }}
             >
 
             </div>
             {/* Browser Content */}
-            <div className="flex-1 w-full h-screen rounded-lg overflow-hidden">
+            <div className="flex-1 w-full h-screen rounded-lg overflow-hidden shadow-inner">
               {activeTab && (
                 <webview
                   ref={webviewRef}
                   src={activeTab.url}
-                  className="w-full h-full rounded-lg overflow-hidden"
+                  className="bg-background max-w-[calc(100%-theme(spacing.4)/2)] h-[calc(100vh-theme(spacing.4)/2)] mt-1 ml-1 rounded-lg overflow-hidden"
                   webpreferences="nodeIntegration=false, contextIsolation=true"
                 />
               )}
@@ -210,14 +210,14 @@ const InAppBrowser = () => {
         </div>
       ) : (
         // TopBar Layout
-        <div className="flex flex-col h-full w-full bg-background">
+        <div className="flex flex-col items-between shadow-inner w-full h-full pb-1 bg-background">
           <TopBar {...navigationProps} />
-          <div className="flex-1 m-0.5 ">
+          <div className="flex-1 bg-background ">
             {activeTab && (
               <webview
                 ref={webviewRef}
                 src={activeTab.url}
-                className="w-full h-full rounded-lg overflow-hidden"
+                className="w-full ml-1 max-w-[calc(100%-theme(spacing.4)/2)] h-full rounded-lg overflow-hidden"
                 webpreferences="nodeIntegration=false, contextIsolation=true"
               />
             )}
