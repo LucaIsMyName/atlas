@@ -37,6 +37,7 @@ const TopBar = ({
 
   return (
     <div
+      data-atlas="TopBar"
       className="relative flex items-center justify-between px-2 w-full"
       style={{
         WebkitAppRegion: "drag",
@@ -78,7 +79,7 @@ const TopBar = ({
           onUrlChange={onUrlChange}
           isOpen={isUrlModalOpen}
           setIsUrlModalOpen={setIsUrlModalOpen} // Pass the setter instead of onClose
-          className="w-[300px] mx-4"
+          className="min-w-[240px] max-w-[240px] mx-4"
         />
         <div
           className="flex items-center flex-shrink-0"

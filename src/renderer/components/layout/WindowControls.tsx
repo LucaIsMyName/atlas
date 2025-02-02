@@ -3,21 +3,21 @@ import { Minus, Square, X } from "lucide-react";
 
 const WindowControls = () => {
   const handleWindowControl = (action: "minimize" | "maximize" | "close") => {
-    console.log('Window control clicked:', action);
-    console.log('electronAPI available:', !!window.electronAPI);
-    console.log('windowControls available:', !!window.electronAPI?.windowControls);
-    
+    console.log("Window control clicked:", action);
+    console.log("electronAPI available:", !!window.electronAPI);
+    console.log("windowControls available:", !!window.electronAPI?.windowControls);
+
     if (window.electronAPI?.windowControls) {
       console.log(`Calling ${action}...`);
-      window.electronAPI.windowControls[action]()
-        .catch(err => console.error(`Error in ${action}:`, err));
+      window.electronAPI.windowControls[action]().catch((err) => console.error(`Error in ${action}:`, err));
     } else {
-      console.error('Window controls not available');
+      console.error("Window controls not available");
     }
   };
 
   return (
     <div
+      data-atlas="WindowControls"
       className="flex items-center gap-2 mr-6"
       style={{ WebkitAppRegion: "no-drag" }}>
       <button

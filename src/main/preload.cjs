@@ -32,6 +32,7 @@ try {
     windowControls: true,
     getEnvVariable: true
   });
+  
 } catch (error) {
   console.error('Error in preload script:', error);
 }

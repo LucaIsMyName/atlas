@@ -344,8 +344,8 @@ const InAppBrowser = () => {
   }, [layout, handleNewTab, setIsUrlModalOpen, handleLayoutChange]); // Add all dependencies
 
   return (
-    <div className="h-screen flex relative border-[0.5px] border-background/20 rounded-[10px] overflow-hidden">
-      <GradientLayer color="teal" />
+    <div data-atlas="Browser" className="h-screen flex relative border-[0.5px] border-background/20 rounded-[10px] overflow-hidden">
+      <GradientLayer color="" />
       <GradientLayer />
       {/* Layout Selection */}
       {layout === 'sidebar' ? (
@@ -390,14 +390,6 @@ const InAppBrowser = () => {
           </div>
         </div>
       )}
-
-      {/* Settings Modal */}
-      {/* <SettingsModal
-        isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
-        onLayoutChange={handleLayoutChange}
-        onThemeChange={handleThemeChange}
-      /> */}
     </div>
   );
 };

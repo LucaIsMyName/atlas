@@ -18,11 +18,12 @@ const UrlModal = ({ isOpen, onClose, urlInput, onUrlChange, onUrlSubmit }) => {
 
   return (
     <div
+      data-atlas="UrlModal"
       className="fixed inset-0 bg-black/50 z-[200] flex items-center justify-center"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}>
-      <div className={`relative w-full max-w-2xl rounded-lg border-2 border-background shadow-xl p-4 overflow-hidden !block`}>
+      <div className={`relative w-full max-w-2xl mx-4 rounded-lg border-2 border-background shadow-xl p-4 overflow-hidden !block`}>
         <GradientLayer />
         <div className="relative z-10">
           <div className=" hidden justify-between items-center mb-4">
@@ -69,12 +70,13 @@ const UrlInput = ({ onUrlSubmit, urlInput, onUrlChange, className = "", isOpen =
   return (
     <>
       <button
+        data-atlas="UrlInput"
         onClick={() => setIsUrlModalOpen(true)} // Changed from onClose(true)
-        className={`${STYLE.tab} relative block w-full !px-2 min-w-[240px] max-w-[240px] !py-1.5 bg-background/30 ${className}`}
+        className={`${STYLE.tab} relative block w-full !px-2 !py-1.5 bg-background/30 ${className}`}
         style={{ WebkitAppRegion: "no-drag" }}>
         <GradientLayer />
-        {urlInput.startsWith("https") ? <Shield className="w-4 h-4 opacity-50 text-foreground-secondary flex-shrink-0" />: <ShieldAlert className="w-4 h-4 opacity-50 text-foreground-secondary flex-shrink-0" />}
-        <span className="text-sm text-foreground/60 truncate">{formatedUrlInput(urlInput) || "Search or enter URL"}</span>
+        {urlInput.startsWith("https") ? <Shield className="w-4 h-4 opacity-50 text-foreground-secondary flex-shrink-0" /> : <ShieldAlert className="w-4 h-4 opacity-50 text-foreground-secondary flex-shrink-0" />}
+        <span className="text-sm text-foreground/60 truncate block">{formatedUrlInput(urlInput) || "Search or enter URL"}</span>
       </button>
 
       <UrlModal

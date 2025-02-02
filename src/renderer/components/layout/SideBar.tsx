@@ -29,8 +29,8 @@ const SideBar = ({
   webviewRef,
 }) => {
   return (
-    <div className={`w-64 h-full flex flex-col ${className}`}>
-      <div className="w-64 p-0">
+    <div data-atlas="SideBar" className={`w-[clamp(240px,30vw,480px)] h-full flex flex-col ${className}`}>
+      <div className=" p-0">
         <div className="flex items-center justify-between p-4">
           <WindowControls />
           <BrowserControls
@@ -40,18 +40,18 @@ const SideBar = ({
             webviewRef={webviewRef}
           />
         </div>
-        <div className="">
-          <div className=" mx-2">
+        <div className="mx-2">
+          <div className="w-full">
             <UrlInput
               onUrlSubmit={onUrlSubmit}
               urlInput={urlInput}
               onUrlChange={onUrlChange}
               isOpen={isUrlModalOpen}
               setIsUrlModalOpen={setIsUrlModalOpen} // Pass the setter instead of onClose
-              className="w-[300px]"
+              className="block w-full"
             />
           </div>
-          <div className="px-2 w-full">
+          <div className="w-full">
             <hr className="mt-4 mb-2 h-0 border-t w-full block opacity-10" />
           </div>
         </div>
