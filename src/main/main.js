@@ -3,6 +3,9 @@ import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import isDev from 'electron-is-dev';
+import dotenv from 'dotenv';
+dotenv.config();
+
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -119,4 +122,8 @@ ipcMain.handle('window-close', () => {
     return true;
   }
   return false;
+});
+
+ipcMain.handle('get-env-variable', (event, key) => {
+  return process.env[key];
 });

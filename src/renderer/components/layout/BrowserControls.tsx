@@ -105,6 +105,7 @@ const BrowserControls = ({ webviewRef, activeTab, onBack, onForward }) => {
         isOpen={isSummarizeOpen}
         onClose={() => setIsSummarizeOpen(false)}
         content={pageContent}
+        currentTab={activeTab}
       />
     </>
   );

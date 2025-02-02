@@ -44,14 +44,21 @@ const TopBar = ({
         zIndex: 50, // Add this
       }}>
       {/* Left Section */}
-      <section className="flex items-center flex-shrink-0 " style={{
-        WebkitAppRegion: "no-drag",
-        WebkitUserSelect: "none",
-      }}>
+      <section
+        className="flex items-center flex-shrink-0 "
+        style={{
+          WebkitAppRegion: "no-drag",
+          WebkitUserSelect: "none",
+        }}>
         <div className="pl-2">
           <WindowControls />
         </div>
-        <BrowserControls activeTab={activeTabId} webviewRef={webviewRef} />
+        <BrowserControls
+          activeTab={activeTabId ? tabs.find((tab) => tab.id === activeTabId) : ""}
+          onBack={() => webviewRef.current.goBack()}
+          onForward={() => webviewRef.current.goForward()}
+          webviewRef={webviewRef}
+        />
         <div
           className="relative"
           style={{ zIndex: 100 }}>
@@ -139,7 +146,9 @@ const TopBar = ({
                     <motion.div
                       className="flex gap-2 items-center  w-full text-left truncate"
                       layout>
-                      <motion.div layout className="w-4 h-4 flex-shrink-0">
+                      <motion.div
+                        layout
+                        className="w-4 h-4 flex-shrink-0">
                         {tab.isLoading ? (
                           <Loader2 className="w-4 h-4 animate-spin text-foreground/50" />
                         ) : (
@@ -154,10 +163,7 @@ const TopBar = ({
                           />
                         )}
                       </motion.div>
-                      <span
-                        className="truncate text-sm">
-                        {tab.isLoading ? <span className="text-background">Loading...</span> : tab.title || "New Tab"}
-                      </span>
+                      <span className="truncate text-sm">{tab.isLoading ? <span className="text-background">Loading...</span> : tab.title || "New Tab"}</span>
                     </motion.div>
                     <motion.button
                       whileHover={{ scale: 1.1 }}

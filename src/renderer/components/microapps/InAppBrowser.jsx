@@ -345,7 +345,7 @@ const InAppBrowser = () => {
 
   return (
     <div className="h-screen flex relative border-[0.5px] border-background/20 rounded-[10px] overflow-hidden">
-      <GradientLayer />
+      <GradientLayer color="teal" />
       <GradientLayer />
       {/* Layout Selection */}
       {layout === 'sidebar' ? (

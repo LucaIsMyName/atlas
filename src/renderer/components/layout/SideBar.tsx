@@ -28,13 +28,17 @@ const SideBar = ({
   setIsUrlModalOpen, // Add these two props
   webviewRef,
 }) => {
-  
   return (
     <div className={`w-64 h-full flex flex-col ${className}`}>
       <div className="w-64 p-0">
         <div className="flex items-center justify-between p-4">
           <WindowControls />
-          <BrowserControls webviewRef={webviewRef} />
+          <BrowserControls
+            activeTab={activeTabId ? tabs.find((tab) => tab.id === activeTabId) : ""}
+            onBack={() => webviewRef.current.goBack()}
+            onForward={() => webviewRef.current.goForward()}
+            webviewRef={webviewRef}
+          />
         </div>
         <div className="">
           <div className=" mx-2">

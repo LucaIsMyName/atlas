@@ -23,11 +23,14 @@ try {
         log('Close requested');
         return await ipcRenderer.invoke('window-close');
       }
-    }
+    },
+    getEnvVariable: (key) => ipcRenderer.invoke('get-env-variable', key)
+   
   });
-  
-  log('APIs exposed successfully:', {
-    windowControls: true
+
+  console.log('[Preload]: APIs exposed successfully:', {
+    windowControls: true,
+    getEnvVariable: true
   });
 } catch (error) {
   console.error('Error in preload script:', error);
