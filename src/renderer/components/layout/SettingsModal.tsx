@@ -71,7 +71,7 @@ const SettingsModal = ({ isOpen, onClose, onLayoutChange, onThemeChange }) => {
             <span className="text-sm font-medium text-foreground">Theme</span>
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-full text-foreground transition-colors"
+              className="p-2 rounded-full  transition-colors"
             >
               {theme === 'light' ? (
                 <Moon className="w-5 h-5" />

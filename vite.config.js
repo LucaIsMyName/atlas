@@ -19,11 +19,11 @@ export default defineConfig({
     ],
     exclude: ['sql.js']
   },
-  build: {
-    commonjsOptions: {
-      include: [/prettier/, , /sql\.js/]
-    }
-  },
+  // build: {
+  //   commonjsOptions: {
+  //     include: [/prettier/, , /sql\.js/]
+  //   }
+  // },
   base: process.env.ELECTRON=="true" ? './' : '/',
   resolve: {
     alias: {

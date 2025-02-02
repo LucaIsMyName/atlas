@@ -4,7 +4,7 @@ import InAppBrowser from "./components/microapps/InAppBrowser";
 
 const App = () => {
   return (
-    <div className="App">
+    <div className="App text-foreground">
       <InAppBrowser />
     </div>
   );

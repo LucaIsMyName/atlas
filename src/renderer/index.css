@@ -2,30 +2,38 @@
 @tailwind components;
 @tailwind utilities;
 
-:root{
-  --foreground: #1e1e1e;
-  --foreground-secondary: #2d2d2d;
-  --foreground-tertiary: #3a3a3a;
-  --foreground-quaternary: #4a4a4a;
-  --foreground-light: #5a5a5a;
-  --background: #ebebeb;
-  --background-secondary: #d9d9d9;
-  --background-tertiary: #c4c4c4;
-  --background-quaternary: #9a9a9a;
-  --background-light: #4a4a4a;
-} 
+:root {
+  --app-opacity: 0.8;
+  --content-opacity: 0.95;
+
+  --background: 255 255 255; /* Instead of rgb(255, 255, 255) */
+  --background-primary: 255 255 255;
+  --background-secondary: 243 243 243;
+  --background-tertiary: 229 229 229;
+  --background-accent: 59 130 246;
+  
+  --foreground: 0 0 0;
+  --foreground-primary: 17 17 17;
+  --foreground-secondary: 75 75 75;
+  --foreground-tertiary: 107 107 107;
+  --foreground-accent: 37 99 235;
+}
 
 .dark {
-  --background: #1a1a1a;
-  --background-secondary: #272727;
-  --background-tertiary: #343434;
-  --background-quaternary: #474747;
-  --background-light: #5a5a5a;
-  --foreground: #e6e6e6;
-  --foreground-secondary: #c3c3c3;
-  --foreground-tertiary: #aaaaaa;
-  --foreground-quaternary: #6a6a6a;
-  --foreground-light: #4a4a4a;
+  --app-opacity: 0.7;
+  --content-opacity: 0.9;
+  
+  --background: 17 17 24; /* Instead of rgb(17, 24, 39) */
+  --background-primary: 31 31 31;
+  --background-secondary: 55 55 55;
+  --background-tertiary: 75 75 75;
+  --background-accent: 59 130 246;
+  
+  --foreground: 255 255 255;
+  --foreground-primary: 243 243 243;
+  --foreground-secondary: 209 209 209;
+  --foreground-tertiary: 156 156 156;
+  --foreground-accent: 96 165 250;
 }
 
 webview {
@@ -154,6 +162,16 @@ input[type="color"] {
   z-index: 9999;
   padding: 0;
   margin: 0;
+}
+
+/* Add to your global CSS */
+.tippy-box[data-theme~='custom'] {
+  background-color: transparent;
+  padding: 0;
+}
+
+.tippy-box[data-theme~='custom'] .tippy-content {
+  padding: 0;
 }
 
 .h-screen {

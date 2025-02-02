@@ -15,6 +15,10 @@ function createWindow() {
     titleBarStyle: 'hidden',
     titleBarOverlay: false,
     title: 'Atlas Browser',
+    transparent: true,
+    backgroundColor: '#00000000', 
+    vibrancy: 'under-window',
+    visualEffectState: 'active',
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -25,13 +29,21 @@ function createWindow() {
     },
   });
 
+  if (process.platform === 'win32') {
+    const { setWindowEffect } = require('electron-acrylic-window');
+    setWindowEffect(mainWindow, {
+      effect: 'acrylic',
+      useCustomWindowRefreshMethod: true,
+    });
+  }
+
   if (process.platform === 'darwin') {
     mainWindow.setWindowButtonVisibility(false);
   }
 
   if (isDev) {
     try {
-      mainWindow.loadURL('http://localhost:5175');
+      mainWindow.loadURL('http://localhost:5174'); // Changed from 5175 to 5174
       mainWindow.webContents.openDevTools();
     } catch (e) {
       console.error('Failed to load dev server:', e);

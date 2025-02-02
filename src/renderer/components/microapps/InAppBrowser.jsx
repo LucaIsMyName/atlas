@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import TopBar from './TopBar';
-import SideBar from './SideBar';
-import SettingsModal from './SettingsModal';
+import TopBar from '../layout/TopBar';
+import SideBar from '../layout/SideBar';
 import { formatUrl } from '../utils/urlHelpers';
+import GradientLayer from '../layout/GradientLayer';
 
 const STORAGE_KEYS = {
   TABS: 'browser_tabs',
@@ -178,15 +178,18 @@ const InAppBrowser = () => {
     onNewTab: handleNewTab,
     onCloseTab: handleCloseTab,
     onTabClick: handleTabClick,
-    onSettingsOpen: () => setIsSettingsOpen(true)
+    onSettingsOpen: () => setIsSettingsOpen(true),
+    onThemeChange: handleThemeChange,
+    onLayoutChange: handleLayoutChange
   };
 
   return (
-    <div className="h-screen flex">
+    <div className="h-screen flex relative shadow-inner border-[0.5px] border-foreground-secondary/10 dark:border-black rounded-lg overflow-hidden">
+      <GradientLayer className="shadow-inner" />
       {/* Layout Selection */}
       {layout === 'sidebar' ? (
-        <div className="flex flex-1 h-full">
-          <SideBar {...navigationProps} />
+        <div className="flex flex-1 h-full z-10 relative">
+          <SideBar {...navigationProps} classname="z-20 relative" />
           <div className="flex-1 w-full">
             {/* Window Controls for Sidebar Layout */}
             <div
@@ -201,7 +204,8 @@ const InAppBrowser = () => {
                 <webview
                   ref={webviewRef}
                   src={activeTab.url}
-                  className="bg-background max-w-[calc(100%-theme(spacing.4)/2)] h-[calc(100vh-theme(spacing.4)/2)] mt-1 ml-1 rounded-lg overflow-hidden"
+                  className="z-0 relative w-full ml-1 max-w-[calc(100%-theme(spacing.4)/2)] h-[calc(100vh-theme(spacing.4)/2)] mt-[calc(theme(spacing.4)/4)] rounded-lg overflow-hidden"
+                  style={{ zIndex: 1 }}  // Add this line
                   webpreferences="nodeIntegration=false, contextIsolation=true"
                 />
               )}
@@ -209,15 +213,15 @@ const InAppBrowser = () => {
           </div>
         </div>
       ) : (
-        // TopBar Layout
-        <div className="flex flex-col items-between shadow-inner w-full h-full pb-1 bg-background">
-          <TopBar {...navigationProps} />
-          <div className="flex-1 bg-background ">
+        <div className="flex flex-col items-between shadow-inner w-full h-full pb-1">
+          <TopBar {...navigationProps} className="z-10 relative" />
+          <div className="z-20 relative flex-1  ">
             {activeTab && (
               <webview
                 ref={webviewRef}
                 src={activeTab.url}
-                className="w-full ml-1 max-w-[calc(100%-theme(spacing.4)/2)] h-full rounded-lg overflow-hidden"
+                className="z-0 relative w-full ml-1 max-w-[calc(100%-theme(spacing.4)/2)] h-full rounded-lg overflow-hidden"
+                style={{ zIndex: 1 }}
                 webpreferences="nodeIntegration=false, contextIsolation=true"
               />
             )}
@@ -226,12 +230,12 @@ const InAppBrowser = () => {
       )}
 
       {/* Settings Modal */}
-      <SettingsModal
+      {/* <SettingsModal
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
         onLayoutChange={handleLayoutChange}
         onThemeChange={handleThemeChange}
-      />
+      /> */}
     </div>
   );
 };
