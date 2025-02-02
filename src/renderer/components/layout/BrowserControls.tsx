@@ -2,10 +2,23 @@ import React, { useState } from "react";
 import { ArrowLeft, ArrowRight, RefreshCw, Sparkles } from "lucide-react";
 import SummarizeModal from "./SummarizeModal";
 
-const BrowserControls = ({ webviewRef }) => {
+const BrowserControls = ({ webviewRef, activeTab, onBack, onForward }) => {
   const [isSummarizeOpen, setIsSummarizeOpen] = useState(false);
   const [pageContent, setPageContent] = useState("");
+  const canGoBack = activeTab && activeTab.historyIndex > 0;
+  const canGoForward = activeTab && activeTab.historyIndex < activeTab.history.length - 1;
 
+  const handleBack = () => {
+    if (canGoBack && activeTab) {
+      onBack(activeTab.id);
+    }
+  };
+
+  const handleForward = () => {
+    if (canGoForward && activeTab) {
+      onForward(activeTab.id);
+    }
+  };
   const handleSummarize = async () => {
     console.log("Handling summarize click");
     console.log("Webview ref:", webviewRef);
@@ -62,22 +75,20 @@ const BrowserControls = ({ webviewRef }) => {
         className="flex items-center space-x-1"
         style={{ WebkitAppRegion: "no-drag" }}>
         <button
-          onClick={() => {
-            history.back();
-          }}
-          className="p-1 hover:text-foreground/90">
+          onClick={handleBack}
+          className={`p-1 ${canGoBack ? 'hover:text-foreground/90' : 'opacity-50 cursor-not-allowed'}`}>
           <ArrowLeft className="w-4 h-4" />
         </button>
         <button
-          onClick={() => {
-            history.forward();
-          }}
-          className="p-1 hover:text-foreground/90">
+          onClick={handleForward}
+          className={`p-1 ${canGoForward ? 'hover:text-foreground/90' : 'opacity-50 cursor-not-allowed'}`}>
           <ArrowRight className="w-4 h-4" />
         </button>
         <button
           onClick={() => {
-            location.reload();
+            if (webviewRef.current) {
+              webviewRef.current.reload();
+            }
           }}
           className="p-1 hover:text-foreground/90">
           <RefreshCw className="w-4 h-4" />

@@ -51,7 +51,7 @@ const TopBar = ({
         <div className="pl-2">
           <WindowControls />
         </div>
-        <BrowserControls webviewRef={webviewRef} />
+        <BrowserControls activeTab={activeTabId} webviewRef={webviewRef} />
         <div
           className="relative"
           style={{ zIndex: 100 }}>
