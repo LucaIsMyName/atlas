@@ -29,7 +29,7 @@ const SideBar = ({
   webviewRef,
 }) => {
   return (
-    <div data-atlas="SideBar" className={`w-[clamp(240px,30vw,480px)] h-full flex flex-col ${className}`}>
+    <div data-atlas="SideBar" className={`w-[clamp(280px,30vw,420px)] h-full flex flex-col ${className}`}>
       <div className=" p-0">
         <div className="flex items-center justify-between p-4">
           <WindowControls />

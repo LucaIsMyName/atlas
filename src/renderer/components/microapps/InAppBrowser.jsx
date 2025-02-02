@@ -364,7 +364,7 @@ const InAppBrowser = () => {
                 <webview
                   ref={webviewRef}
                   src={activeTab.url}
-                  className="bg-white z-0 relative w-full ml-1 max-w-[calc(100%-theme(spacing.4)/2)] h-[calc(100vh-theme(spacing.1)*2)] top-1 rounded-lg overflow-hidden"
+                  className="bg-white z-0 relative w-full  mr-1 max-w-[calc(100%-theme(spacing.1)*2)] h-[calc(100vh-theme(spacing.2)*2)] top-2 rounded-lg overflow-hidden"
                   style={{ zIndex: 1 }}
                   webpreferences="nodeIntegration=false, contextIsolation=true"
                   allowpopups="true"
