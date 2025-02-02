@@ -135,6 +135,7 @@ const InAppBrowser = () => {
 
 
   // Webview event handlers
+  // Webview event handlers
   useEffect(() => {
     if (!webviewRef.current) return;
 
@@ -158,17 +159,40 @@ const InAppBrowser = () => {
       setUrlInput(webviewRef.current.getURL());
     };
 
+    // Handle new window requests (e.g., target="_blank")
+    const handleNewWindow = (e) => {
+      e.preventDefault();
+      const newTab = {
+        id: Date.now().toString(),
+        url: e.url,
+        title: 'Loading...',
+        isLoading: true
+      };
+      setTabs(prev => [...prev, newTab]);
+      setActiveTabId(newTab.id);
+    };
+
+    // Handle regular navigation within the tab
+    const handleWillNavigate = (e) => {
+      setTabs(prev => prev.map(tab =>
+        tab.id === activeTabId ? { ...tab, url: e.url, isLoading: true } : tab
+      ));
+    };
+
     webviewRef.current.addEventListener('did-start-loading', handleLoadStart);
     webviewRef.current.addEventListener('did-stop-loading', handleLoadStop);
+    webviewRef.current.addEventListener('new-window', handleNewWindow);
+    webviewRef.current.addEventListener('will-navigate', handleWillNavigate);
 
     return () => {
       if (webviewRef.current) {
         webviewRef.current.removeEventListener('did-start-loading', handleLoadStart);
         webviewRef.current.removeEventListener('did-stop-loading', handleLoadStop);
+        webviewRef.current.removeEventListener('new-window', handleNewWindow);
+        webviewRef.current.removeEventListener('will-navigate', handleWillNavigate);
       }
     };
   }, [activeTabId]);
-
   // Shared props for navigation components
   const navigationProps = {
     tabs,
@@ -236,12 +260,13 @@ const InAppBrowser = () => {
             <div className="flex-1 w-full h-screen rounded-lg overflow-hidden shadow-inner">
               {activeTab && (
                 <webview
-                  ref={webviewRef}
-                  src={activeTab.url}
-                  className="bg-white z-0 relative w-full ml-1 max-w-[calc(100%-theme(spacing.4)/2)] h-[calc(100vh-theme(spacing.4)/2)] mt-[calc(theme(spacing.4)/4)] rounded-lg overflow-hidden"
-                  style={{ zIndex: 1 }}  // Add this line
-                  webpreferences="nodeIntegration=false, contextIsolation=true"
-                />
+                ref={webviewRef}
+                src={activeTab.url}
+                className="bg-white z-0 relative w-full ml-1 max-w-[calc(100%-theme(spacing.4)/2)] h-[calc(100vh-theme(spacing.1)*2)] top-1 rounded-lg overflow-hidden"
+                style={{ zIndex: 1 }}
+                webpreferences="nodeIntegration=false, contextIsolation=true"
+                allowpopups="true"
+              />
               )}
             </div>
           </div>
@@ -252,12 +277,13 @@ const InAppBrowser = () => {
           <div className="z-20 relative flex-1  ">
             {activeTab && (
               <webview
-                ref={webviewRef}
-                src={activeTab.url}
-                className="bg-white z-0 relative w-full ml-1 max-w-[calc(100%-theme(spacing.4)/2)] h-full rounded-lg overflow-hidden"
-                style={{ zIndex: 1 }}
-                webpreferences="nodeIntegration=false, contextIsolation=true"
-              />
+              ref={webviewRef}
+              src={activeTab.url}
+              className="bg-white z-0 relative w-full ml-1 max-w-[calc(100%-theme(spacing.4)/2)] h-full rounded-lg overflow-hidden"
+              style={{ zIndex: 1 }}
+              webpreferences="nodeIntegration=false, contextIsolation=true"
+              allowpopups="true"
+            />
             )}
           </div>
         </div>

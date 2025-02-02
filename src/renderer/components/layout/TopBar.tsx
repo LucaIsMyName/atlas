@@ -39,12 +39,15 @@ const TopBar = ({
     <div
       className="relative flex items-center justify-between px-2 w-full"
       style={{
-        WebkitAppRegion: "no-drag",
+        WebkitAppRegion: "drag",
         WebkitUserSelect: "none",
         zIndex: 50, // Add this
       }}>
       {/* Left Section */}
-      <section className="flex items-center flex-shrink-0">
+      <section className="flex items-center flex-shrink-0 " style={{
+        WebkitAppRegion: "no-drag",
+        WebkitUserSelect: "none",
+      }}>
         <div className="pl-2">
           <WindowControls />
         </div>
@@ -136,7 +139,7 @@ const TopBar = ({
                     <motion.div
                       className="flex gap-2 items-center  w-full text-left truncate"
                       layout>
-                      <div className="w-4 h-4 flex-shrink-0">
+                      <motion.div layout className="w-4 h-4 flex-shrink-0">
                         {tab.isLoading ? (
                           <Loader2 className="w-4 h-4 animate-spin text-foreground/50" />
                         ) : (
@@ -150,12 +153,11 @@ const TopBar = ({
                             }}
                           />
                         )}
-                      </div>
-                      <motion.span
-                        layout
+                      </motion.div>
+                      <span
                         className="truncate text-sm">
                         {tab.isLoading ? <span className="text-background">Loading...</span> : tab.title || "New Tab"}
-                      </motion.span>
+                      </span>
                     </motion.div>
                     <motion.button
                       whileHover={{ scale: 1.1 }}
