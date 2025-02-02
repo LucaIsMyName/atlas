@@ -5,8 +5,17 @@ import SummarizeModal from "./SummarizeModal";
 const BrowserControls = ({ webviewRef, activeTab, onBack, onForward }) => {
   const [isSummarizeOpen, setIsSummarizeOpen] = useState(false);
   const [pageContent, setPageContent] = useState("");
-  const canGoBack = activeTab && activeTab.historyIndex > 0;
-  const canGoForward = activeTab && activeTab.historyIndex < activeTab.history.length - 1;
+
+  // Defensive checks for canGoBack and canGoForward
+  const canGoBack = activeTab && 
+    activeTab.history && 
+    activeTab.history.length > 0 && 
+    activeTab.historyIndex > 0;
+  
+  const canGoForward = activeTab && 
+    activeTab.history && 
+    activeTab.history.length > 0 && 
+    activeTab.historyIndex < activeTab.history.length - 1;
 
   const handleBack = () => {
     if (canGoBack && activeTab) {
@@ -19,6 +28,7 @@ const BrowserControls = ({ webviewRef, activeTab, onBack, onForward }) => {
       onForward(activeTab.id);
     }
   };
+
   const handleSummarize = async () => {
     console.log("Handling summarize click");
     console.log("Webview ref:", webviewRef);

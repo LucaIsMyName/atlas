@@ -221,8 +221,8 @@ const SummarizeModal = ({ isOpen, onClose, content, currentTab }) => {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.1 }}
-                className="text-lg font-semibold text-foreground">
-                Page Summary for {getTabTitle(currentTab)}
+                className=" text-foreground">
+                <span className="text-foreground-secondary text-sm font-regular">Page Summary for</span><br /><span className="text-lg">{getTabTitle(currentTab)}</span>
               </motion.h2>
               <motion.button
                 initial={{ opacity: 0, x: 20 }}
