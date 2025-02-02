@@ -6,7 +6,6 @@ import { fileURLToPath } from 'url'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
   optimizeDeps: {
@@ -19,11 +18,6 @@ export default defineConfig({
     ],
     exclude: ['sql.js']
   },
-  // build: {
-  //   commonjsOptions: {
-  //     include: [/prettier/, , /sql\.js/]
-  //   }
-  // },
   base: process.env.ELECTRON=="true" ? './' : '/',
   resolve: {
     alias: {
@@ -31,8 +25,8 @@ export default defineConfig({
     },
   },
   server: {
-    port: 5174,
-    strictPort: false,
+    port: 5173,  // Changed from 5174 to 5173
+    strictPort: true,  // Added to ensure it uses this port
     host: true,
     fs: {
       allow: ['..']

@@ -15,8 +15,14 @@ const InAppBrowser = () => {
   const webviewRef = React.useRef(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [urlInput, setUrlInput] = useState('');
+  const [isUrlModalOpen, setIsUrlModalOpen] = useState(false);
+
+  // Initialize theme and layout first
   const [theme, setTheme] = useState(() =>
     localStorage.getItem(STORAGE_KEYS.THEME) || 'light'
+  );
+  const [layout, setLayout] = useState(() =>
+    localStorage.getItem(STORAGE_KEYS.LAYOUT) || 'topbar'
   );
 
   useEffect(() => {
@@ -31,11 +37,6 @@ const InAppBrowser = () => {
     }
   }, []);
 
-  const [layout, setLayout] = useState(() =>
-    localStorage.getItem(STORAGE_KEYS.LAYOUT) || 'topbar'
-  );
-
-
   // Initialize tabs
   const [tabs, setTabs] = useState(() => {
     try {
@@ -47,7 +48,6 @@ const InAppBrowser = () => {
       return [{ id: '1', url: 'https://www.google.com', title: 'Google', isLoading: false }];
     }
   });
-
   // Initialize active tab
   const [activeTabId, setActiveTabId] = useState(() => {
     try {
@@ -56,6 +56,7 @@ const InAppBrowser = () => {
       return tabs[0]?.id;
     }
   });
+
 
   // Save settings to localStorage
   useEffect(() => {
@@ -180,12 +181,46 @@ const InAppBrowser = () => {
     onTabClick: handleTabClick,
     onSettingsOpen: () => setIsSettingsOpen(true),
     onThemeChange: handleThemeChange,
-    onLayoutChange: handleLayoutChange
+    onLayoutChange: handleLayoutChange,
+    isUrlModalOpen,
+    webviewRef,
+    setIsUrlModalOpen
   };
 
+  useEffect(() => {
+    const handleKeyboard = (e) => {
+      const isCmdOrCtrl = e.metaKey || e.ctrlKey;
+
+      if (isCmdOrCtrl) {
+        switch (e.key) {
+          case 't':
+            e.preventDefault();
+            handleNewTab();
+            setIsUrlModalOpen(true);
+            break;
+          case 'l':
+            e.preventDefault();
+            setIsUrlModalOpen(true); // Add this to open URL input on Cmd+L
+            break;
+          case 'y':
+            e.preventDefault();
+            const newLayout = layout === 'topbar' ? 'sidebar' : 'topbar';
+            handleLayoutChange(newLayout);
+            break;
+          default:
+            break;
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyboard);
+    return () => window.removeEventListener('keydown', handleKeyboard);
+  }, [layout, handleNewTab, setIsUrlModalOpen, handleLayoutChange]); // Add all dependencies
+
   return (
-    <div className="h-screen flex relative shadow-inner border-[0.5px] border-foreground-secondary/10 dark:border-black rounded-lg overflow-hidden">
-      <GradientLayer className="shadow-inner" />
+    <div className="h-screen flex relative border-[0.5px] border-background/20 rounded-[10px] overflow-hidden">
+      <GradientLayer />
+      <GradientLayer />
       {/* Layout Selection */}
       {layout === 'sidebar' ? (
         <div className="flex flex-1 h-full z-10 relative">
@@ -196,7 +231,6 @@ const InAppBrowser = () => {
               className=" flex flex-1 w-full items-center px-3"
               style={{ WebkitAppRegion: 'drag' }}
             >
-
             </div>
             {/* Browser Content */}
             <div className="flex-1 w-full h-screen rounded-lg overflow-hidden shadow-inner">
@@ -204,7 +238,7 @@ const InAppBrowser = () => {
                 <webview
                   ref={webviewRef}
                   src={activeTab.url}
-                  className="z-0 relative w-full ml-1 max-w-[calc(100%-theme(spacing.4)/2)] h-[calc(100vh-theme(spacing.4)/2)] mt-[calc(theme(spacing.4)/4)] rounded-lg overflow-hidden"
+                  className="bg-white z-0 relative w-full ml-1 max-w-[calc(100%-theme(spacing.4)/2)] h-[calc(100vh-theme(spacing.4)/2)] mt-[calc(theme(spacing.4)/4)] rounded-lg overflow-hidden"
                   style={{ zIndex: 1 }}  // Add this line
                   webpreferences="nodeIntegration=false, contextIsolation=true"
                 />
@@ -220,7 +254,7 @@ const InAppBrowser = () => {
               <webview
                 ref={webviewRef}
                 src={activeTab.url}
-                className="z-0 relative w-full ml-1 max-w-[calc(100%-theme(spacing.4)/2)] h-full rounded-lg overflow-hidden"
+                className="bg-white z-0 relative w-full ml-1 max-w-[calc(100%-theme(spacing.4)/2)] h-full rounded-lg overflow-hidden"
                 style={{ zIndex: 1 }}
                 webpreferences="nodeIntegration=false, contextIsolation=true"
               />

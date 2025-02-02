@@ -1,0 +1,14 @@
+{
+  "appId": "com.atlas.browser",
+  "files": [
+    "dist/**/*",
+    "electron/**/*"
+  ],
+  "directories": {
+    "buildResources": "assets",
+    "output": "release/${version}"
+  },
+  "extraMetadata": {
+    "main": "electron/main.js"
+  }
+}

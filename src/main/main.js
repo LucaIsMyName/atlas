@@ -1,8 +1,8 @@
-import { app, BrowserWindow, ipcMain, dialog } from 'electron';
+// src/main/main.js
+import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import isDev from 'electron-is-dev';
-import { promises as fs } from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -11,90 +11,94 @@ function createWindow() {
   const mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
-    frame: false,
+    frame: true,
     titleBarStyle: 'hidden',
     titleBarOverlay: false,
     title: 'Atlas Browser',
     transparent: true,
-    backgroundColor: '#00000000', 
+    backgroundColor: '#00000000',
+    trafficLightPosition: { x: -100, y: -100 }, // Move system buttons off-screen
     vibrancy: 'under-window',
-    visualEffectState: 'active',
+    // visualEffectState: 'active',
+    titleBarOverlay: "hiddenInset",
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      preload: path.join(__dirname, 'preload.js'),
+      preload: path.join(__dirname, 'preload.cjs'),  // Changed to .cjs
       webSecurity: true,
       webviewTag: true,
-      allowRunningInsecureContent: false
+      allowRunningInsecureContent: false,
+      sandbox: false
     },
   });
 
-  if (process.platform === 'win32') {
-    const { setWindowEffect } = require('electron-acrylic-window');
-    setWindowEffect(mainWindow, {
-      effect: 'acrylic',
-      useCustomWindowRefreshMethod: true,
+  // Set CSP
+  mainWindow.webContents.session.webRequest.onHeadersReceived((details, callback) => {
+    callback({
+      responseHeaders: {
+        ...details.responseHeaders,
+        'Content-Security-Policy': ["default-src 'self' 'unsafe-inline' 'unsafe-eval' data: http: https:"]
+      }
     });
-  }
-
-  if (process.platform === 'darwin') {
-    mainWindow.setWindowButtonVisibility(false);
-  }
+  });
 
   if (isDev) {
     try {
-      mainWindow.loadURL('http://localhost:5174'); // Changed from 5175 to 5174
+      mainWindow.loadURL('http://localhost:5173');
       mainWindow.webContents.openDevTools();
+      console.log('Loading development server...');
     } catch (e) {
       console.error('Failed to load dev server:', e);
     }
   } else {
-    mainWindow.loadFile(path.join(__dirname, '../index.html'));
+    mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
   }
+
+  // Debug preload script
+  mainWindow.webContents.on('did-finish-load', () => {
+    console.log('Window loaded, checking preload API...');
+    mainWindow.webContents.executeJavaScript(`
+      console.log('Window API check:', {
+        electronAPI: !!window.electronAPI,
+        windowControls: !!window.electronAPI?.windowControls
+      });
+    `);
+  });
+
+  return mainWindow;
 }
 
-app.whenReady().then(createWindow);
+// Initialize app
+app.whenReady().then(() => {
+  console.log('App is ready, creating window...');
+  createWindow();
 
-// Handle file dialog
-ipcMain.handle('show-file-dialog', async () => {
-  const result = await dialog.showOpenDialog({
-    properties: ['openFile'],
-    filters: [
-      { name: 'Database Files', extensions: ['db', 'sqlite', 'sqlite3', 'sql'] },
-      { name: 'All Files', extensions: ['*'] }
-    ]
+  app.on('activate', () => {
+    if (BrowserWindow.getAllWindows().length === 0) {
+      createWindow();
+    }
   });
-  return result;
-});
-
-// Handle file reading
-ipcMain.handle('read-file', async (event, filePath) => {
-  try {
-    const buffer = await fs.readFile(filePath);
-    return buffer;
-  } catch (error) {
-    throw error;
-  }
 });
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
-    app.quit()
+    app.quit();
   }
-})
+});
 
-app.on('activate', () => {
-  if (BrowserWindow.getAllWindows().length === 0) {
-    createWindow()
-  }
-})
-
+// Window control handlers
 ipcMain.handle('window-minimize', () => {
+  console.log('Minimize requested');
   const win = BrowserWindow.getFocusedWindow();
-  if (win) win.minimize();
+  if (win) {
+    win.minimize();
+    return true;
+  }
+  return false;
 });
 
 ipcMain.handle('window-maximize', () => {
+  console.log('Maximize requested');
   const win = BrowserWindow.getFocusedWindow();
   if (win) {
     if (win.isMaximized()) {
@@ -102,11 +106,17 @@ ipcMain.handle('window-maximize', () => {
     } else {
       win.maximize();
     }
+    return true;
   }
+  return false;
 });
 
 ipcMain.handle('window-close', () => {
-  console.log('Main: close called');
+  console.log('Close requested');
   const win = BrowserWindow.getFocusedWindow();
-  if (win) win.close();
+  if (win) {
+    win.close();
+    return true;
+  }
+  return false;
 });

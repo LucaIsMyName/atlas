@@ -1,6 +1,8 @@
 import React, { useState } from "react"; // Add useState import
 import { Plus, X, Loader2, RefreshCw, ArrowLeft, ArrowRight, Search, Settings, ChevronLeft, ChevronRight } from "lucide-react";
 import { getFaviconUrl } from "../utils/urlHelpers";
+import { motion, AnimatePresence } from "framer-motion";
+
 import { Swiper, SwiperSlide } from "swiper/react";
 import { FreeMode } from "swiper/modules";
 import { STYLE } from "../../config";
@@ -12,7 +14,23 @@ import BrowserControls from "./BrowserControls";
 import UrlInput from "./UrlInput";
 import GradientLayer from "./GradientLayer";
 
-const TopBar = ({ className, tabs, activeTabId, urlInput, onUrlSubmit, onUrlChange, onNewTab, onCloseTab, onTabClick, onSettingsOpen, onThemeChange, onLayoutChange }) => {
+const TopBar = ({
+  className,
+  tabs,
+  activeTabId,
+  urlInput,
+  onUrlSubmit,
+  onUrlChange,
+  onNewTab,
+  onCloseTab,
+  onTabClick,
+  onSettingsOpen,
+  onThemeChange,
+  onLayoutChange,
+  isUrlModalOpen, // Add these two props
+  setIsUrlModalOpen, // Add these two props
+  webviewRef,
+}) => {
   const [swiperRef, setSwiperRef] = useState(null);
   const [isBeginning, setIsBeginning] = useState(true);
   const [isEnd, setIsEnd] = useState(false);
@@ -21,7 +39,7 @@ const TopBar = ({ className, tabs, activeTabId, urlInput, onUrlSubmit, onUrlChan
     <div
       className="relative flex items-center justify-between px-2 w-full"
       style={{
-        WebkitAppRegion: "drag",
+        WebkitAppRegion: "no-drag",
         WebkitUserSelect: "none",
         zIndex: 50, // Add this
       }}>
@@ -30,15 +48,38 @@ const TopBar = ({ className, tabs, activeTabId, urlInput, onUrlSubmit, onUrlChan
         <div className="pl-2">
           <WindowControls />
         </div>
-        <BrowserControls />
+        <BrowserControls webviewRef={webviewRef} />
+        <div
+          className="relative"
+          style={{ zIndex: 100 }}>
+          <SettingsDropdown
+            onLayoutChange={onLayoutChange}
+            onThemeChange={onThemeChange}>
+            <button className="ml-1 p-1.5  rounded text-foreground">
+              <Settings className="w-4 h-4" />
+            </button>
+          </SettingsDropdown>
+        </div>
 
         {/* URL Input */}
         <UrlInput
           onUrlSubmit={onUrlSubmit}
           urlInput={urlInput}
           onUrlChange={onUrlChange}
+          isOpen={isUrlModalOpen}
+          setIsUrlModalOpen={setIsUrlModalOpen} // Pass the setter instead of onClose
           className="w-[300px] mx-4"
         />
+        <div
+          className="flex items-center flex-shrink-0"
+          style={{ WebkitAppRegion: "no-drag" }}>
+          <button
+            onClick={onNewTab}
+            className="p-1 rounded text-foreground">
+            <Plus className="w-4 h-4" />
+          </button>
+          {/* Add a wrapper div with higher z-index */}
+        </div>
       </section>
       {/* Tabs Section with Swiper */}
       <section className="flex-1 flex items-center min-w-0">
@@ -71,41 +112,63 @@ const TopBar = ({ className, tabs, activeTabId, urlInput, onUrlSubmit, onUrlChan
               <SwiperSlide
                 key={tab.id}
                 className="!w-auto !static">
-                <div
-                  onClick={(e) => {
-                    e.stopPropagation(); // Stop event from reaching Swiper
-                    onTabClick(tab.id);
-                  }}
-                  className={`
-                    ${STYLE.tab} w-[160px] group relative
-                    ${activeTabId === tab.id ? "text-background bg-foreground/90 shadow-inner" : "text-foreground-secondary "}
-                  `}>
-                  <GradientLayer className="" />
-                  <div className="flex gap-2 items-center truncate">
-                    <div className="w-4 h-4 flex-shrink-0">
-                      {tab.isLoading ? (
-                        <Loader2 className="w-4 h-4 animate-spin text-foreground/50" />
-                      ) : (
-                        <img
-                          src={getFaviconUrl(tab.url)}
-                          className="w-4 h-4"
-                          onError={(e) => {
-                            e.target.style.display = "none";
-                          }}
-                        />
-                      )}
-                    </div>
-                    <span className="truncate text-sm">{tab.isLoading ? <span className="text-foreground/30">Loading...</span> : tab.title || "New Tab"}</span>
-                  </div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation(); // Stop event from reaching parent elements
-                      onCloseTab(tab.id, e);
+                <AnimatePresence mode="popLayout">
+                  <motion.div
+                    key={tab.id}
+                    initial={{ opacity: 0, scale: 0.8, x: -20 }}
+                    animate={{ opacity: 1, scale: 1, x: 0 }}
+                    exit={{ opacity: 0, scale: 0.8, x: 20 }}
+                    transition={{
+                      type: "spring",
+                      stiffness: 500,
+                      damping: 30,
+                      mass: 1,
                     }}
-                    className="opacity-100 group-hover:opacity-100 hover:bg-background-secondary/50 rounded p-0.5 text-foreground-secondary transition-all duration-150">
-                    <X className="w-3 h-3" />
-                  </button>
-                </div>
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onTabClick(tab.id);
+                    }}
+                    className={`
+                      ${STYLE.tab} w-full relative w-[160px] min-w-[160px] max-w-[160px] justify-between
+                      ${activeTabId === tab.id ? " text-background bg-foreground/90 shadow-sm" : "text-foreground-secondary "}
+                    `}>
+                    <GradientLayer />
+                    <motion.div
+                      className="flex gap-2 items-center  w-full text-left truncate"
+                      layout>
+                      <div className="w-4 h-4 flex-shrink-0">
+                        {tab.isLoading ? (
+                          <Loader2 className="w-4 h-4 animate-spin text-foreground/50" />
+                        ) : (
+                          <motion.img
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            src={getFaviconUrl(tab.url)}
+                            className="w-4 h-4"
+                            onError={(e) => {
+                              e.target.style.display = "none";
+                            }}
+                          />
+                        )}
+                      </div>
+                      <motion.span
+                        layout
+                        className="truncate text-sm">
+                        {tab.isLoading ? <span className="text-background">Loading...</span> : tab.title || "New Tab"}
+                      </motion.span>
+                    </motion.div>
+                    <motion.button
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onCloseTab(tab.id, e);
+                      }}
+                      className="opacity-100 group-hover:opacity-100 hover:bg-background-secondary/50 rounded p-0.5 text-foreground-secondary duration-150">
+                      <X className="w-3 h-3" />
+                    </motion.button>
+                  </motion.div>
+                </AnimatePresence>
               </SwiperSlide>
             ))}
           </Swiper>
@@ -119,27 +182,6 @@ const TopBar = ({ className, tabs, activeTabId, urlInput, onUrlSubmit, onUrlChan
         </button>
       </section>
       {/* Action Buttons */}
-      <div
-        className="flex items-center ml-2 flex-shrink-0"
-        style={{ WebkitAppRegion: "no-drag" }}>
-        <button
-          onClick={onNewTab}
-          className="p-1 rounded text-foreground">
-          <Plus className="w-4 h-4" />
-        </button>
-        {/* Add a wrapper div with higher z-index */}
-        <div
-          className="relative"
-          style={{ zIndex: 9999 }}>
-          <SettingsDropdown
-            onLayoutChange={onLayoutChange}
-            onThemeChange={onThemeChange}>
-            <button className="ml-1 p-1.5  rounded text-foreground">
-              <Settings className="w-4 h-4" />
-            </button>
-          </SettingsDropdown>
-        </div>
-      </div>
     </div>
   );
 };

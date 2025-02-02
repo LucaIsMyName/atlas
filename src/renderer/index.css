@@ -11,7 +11,7 @@
   --background-secondary: 243 243 243;
   --background-tertiary: 229 229 229;
   --background-accent: 59 130 246;
-  
+
   --foreground: 0 0 0;
   --foreground-primary: 17 17 17;
   --foreground-secondary: 75 75 75;
@@ -22,13 +22,13 @@
 .dark {
   --app-opacity: 0.7;
   --content-opacity: 0.9;
-  
+
   --background: 17 17 24; /* Instead of rgb(17, 24, 39) */
   --background-primary: 31 31 31;
   --background-secondary: 55 55 55;
   --background-tertiary: 75 75 75;
   --background-accent: 59 130 246;
-  
+
   --foreground: 255 255 255;
   --foreground-primary: 243 243 243;
   --foreground-secondary: 209 209 209;
@@ -54,108 +54,11 @@ input[type="color"] {
   cursor: pointer;
 }
 
-
 /** dark mode */
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --w-rjv-key-string: #93c9ff;
-    --w-rjv-type-string-color: #ffcc66;
-    --w-rjv-curlybraces-color: #d4d4d4;
-    --w-rjv-quotes-string-color: #9d9d9d;
-    --w-rjv-quotes-color: #9d9d9d;
-    --w-rjv-arrow-color: #d4d4d4;
-  }
-
-  ::selection {
-    background-color: #ab9cff;
-    color: #000;
-  }
-  
-  .cm-gutters {
-    background-color: transparent !important;
-  }
-  .cm-activeLine {
-    background-color: #73737348 !important;
-  }
-  .cm-editor {
-    background-color: transparent !important ;
-  }
-  .ͼf {
-    color: #eff2d0;
-  }
-
-  .ͼk {
-    color: #66fcff;
-  }
-  .ͼh {
-    color: #ff66f0;
-  }
-  .ͼj {
-    color: #ffcc66;
-  }
-  .ͼm {
-    color: #93c9ff;
-  }
-  .ͼe {
-    color: #ff8b8b;
-  }
-  .ͼc {
-    color: #c3e88d;
-  }
-
-  .ͼd {
-    color: #ffcc66;
-  }
-  .cm-editor .cm-line {
-    color: #d4d4d4 !important;
-  }
-
-  .cm-editor .cm-keyword {
-    color: #569cd6 !important;
-  }
-
-  .cm-editor .cm-atom {
-    color: #d4d4d4 !important;
-  }
-
-  .cm-editor .cm-number {
-    color: #b5cea8 !important;
-  }
-
-  .cm-editor .cm-def {
-    color: #d4d4d4 !important;
-  }
-
-  .cm-editor .cm-variable {
-    color: #9b859d !important;
-  }
-
-  .cm-editor .cm-variable-2 {
-    color: #9b859d !important;
-  }
-
-  .cm-editor .cm-variable-3 {
-    color: #9b859d !important;
-  }
-
-  .cm-editor .cm-property {
-    color: #9b859d !important;
-  }
-
-  .cm-editor .cm-operator {
-    color: #d4d4d4 !important;
-  }
-
-  .cm-editor .cm-comment {
-    color: #6a9955 !important;
-  }
-
-  .cm-editor .cm-string {
-    color: #ce9178 !important;
-  }
-
-
+::selection {
+  background-color: rgba(var(--foreground) / 1);
+  color: rgba(var(--background) / 1);
 }
 
 .tippy-box {
@@ -165,21 +68,11 @@ input[type="color"] {
 }
 
 /* Add to your global CSS */
-.tippy-box[data-theme~='custom'] {
+.tippy-box[data-theme~="custom"] {
   background-color: transparent;
   padding: 0;
 }
 
-.tippy-box[data-theme~='custom'] .tippy-content {
+.tippy-box[data-theme~="custom"] .tippy-content {
   padding: 0;
-}
-
-.h-screen {
-  height: 100vh;
-  overflow: hidden;
-}
-
-.flex-1 {
-  flex: 1 1 0%;
-  min-height: 0;
 }
