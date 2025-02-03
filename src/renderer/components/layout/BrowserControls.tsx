@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { ArrowLeft, History, ArrowRight, Info, RefreshCw, GalleryHorizontalEnd, Sparkles, Bookmark, Download, Trash2, ExternalLink, DownloadIcon } from "lucide-react";
+import { ArrowLeft, History, Github, Globe, ArrowRight, Info, RefreshCw, GalleryHorizontalEnd, Sparkles, Bookmark, Download, Trash2, ExternalLink, DownloadIcon } from "lucide-react";
 import Tippy from "@tippyjs/react";
 import "tippy.js/animations/scale.css";
 import "tippy.js/dist/tippy.css";
@@ -184,8 +184,7 @@ const BrowserControls = ({ webviewRef, activeTab, onBack, onForward }) => {
     <div
       data-atlas="HistoryDropdown"
       style={{ WebkitAppRegion: "no-drag" }}
-      className={`relative text-foreground z-50 px-2 pb-2 !block !rounded-lg !overflow-hidden`}>
-      <GradientLayer className="rounded-lg" />
+      className={`relative text-foreground bg-background/90 backdrop-blur-lg z-50 px-2 pb-2 !block !rounded-lg !overflow-hidden`}>
       <div className="relative z-10 space-y-2">
         <div className="flex items-center gap-2 py-2">
           <History
@@ -241,8 +240,8 @@ const BrowserControls = ({ webviewRef, activeTab, onBack, onForward }) => {
     <div
       data-atlas="DownloadsDropdown"
       style={{ WebkitAppRegion: "no-drag" }}
-      className={`relative text-foreground z-50 px-2 pb-2 rounded-lg overflow-hidden`}>
-      <GradientLayer className="rounded-lg overflow-hidden" />
+      className={`relative text-foreground z-50 px-2 pb-2 bg-background/90 backdrop-blur-lg rounded-lg overflow-hidden`}>
+      {/* <GradientLayer className="rounded-lg overflow-hidden" /> */}
       <div className="relative z-10 space-y-2 ">
         <div className="flex items-center gap-2 py-2">
           <DownloadIcon
@@ -295,23 +294,42 @@ const BrowserControls = ({ webviewRef, activeTab, onBack, onForward }) => {
     <div
       data-atlas="InfoDropdown"
       style={{ WebkitAppRegion: "no-drag" }}
-      className={`user-select-none relative text-foreground z-50 px-2 pb-2 !block !rounded-lg overflow-hidden`}>
-      <GradientLayer />
+      className={`user-select-none relative text-foreground bg-background/90 backdrop-blur-lg z-50 px-2 pb-2 !block !rounded-lg overflow-hidden`}>
       <div className="relative z-10 space-y-2 mt-2">
         {appInfo ? (
-          <div className="p-4 space-y-4">
+          <div className="p-4 space-y-4 select-none">
             <div className="flex items-center justify-center mb-4">
               <img
                 src={`/${appInfo.logo}`}
                 alt={`${appInfo.appName} logo`}
-                className="w-16 h-16 rounded-lg"
+                className="w-16 h-16 rounded-xl shadow-lg border"
               />
             </div>
-            <div className="text-center space-y-1">
+            <div className="text-center space-y-2">
               <h3 className="text-lg font-medium">{appInfo.appName}</h3>
-              <p className="text-xs text-foreground/50">Version {appInfo.version}</p>
-              <p className="text-xs text-foreground/50">{appInfo.description}</p>
+              <p className="text-xs text-foreground/80">{appInfo.description}</p>
+              <p className="text-xs text-foreground/50">
+                Version <br></br><span className="font-mono">{appInfo.version}</span>
+              </p>
             </div>
+            <section className="text-center flex justify-center gap-2">
+              <a
+                href="https://github.com/"
+                className={`${STYLE.tab.default} text-foreground-secondary hover:text-foreground text-xs !px-2 !py-0.5`}>
+                <Github
+                  className="size-3"
+                  strokeWidth={2}
+                />
+                <span>Github</span>
+              </a>
+              <a className={`${STYLE.tab.default} text-foreground-secondary hover:text-foreground text-xs !px-2 !py-1`}>
+                <Globe
+                  className="size-3"
+                  strokeWidth={2}
+                />
+                <span>Website</span>
+              </a>
+            </section>
           </div>
         ) : (
           <div className="text-xs text-foreground/50 text-center py-4">Loading app info...</div>

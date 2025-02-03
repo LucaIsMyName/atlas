@@ -76,8 +76,7 @@ const SettingsDropdown = ({ children, onLayoutChange, onThemeChange }) => {
   const content = (
     <div
       data-atlas="SettingsDropdown"
-      className={`relative text-foreground z-50 px-2 pb-2 !block !rounded-lg overflow-hidden`}>
-      <GradientLayer className="rounded-lg" />
+      className={`relative text-foreground z-50 px-2 pb-2 !block !rounded-lg overflow-hidden bg-background/90 backdrop-blur-lg` }>
       <div className="relative z-10 flex items-center justify-between p-2 rounded-lg transition-colors">
         <span className="text-sm  ">Theme</span>
         <button

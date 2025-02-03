@@ -23,8 +23,7 @@ const UrlModal = ({ isOpen, onClose, urlInput, onUrlChange, onUrlSubmit }) => {
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}>
-      <div className={`relative w-full max-w-2xl mx-4 rounded-lg border-2 border-background shadow-xl p-4 overflow-hidden !block`}>
-        <GradientLayer />
+      <div className={`relative w-full max-w-2xl mx-4 rounded-lg border-2 border-background shadow-xl p-4 overflow-hidden !block bg-background/90 backdrop-blur-lg`}>
         <div className="relative z-10">
           <div className=" hidden justify-between items-center mb-4">
             <h3 className="text-3xl font-medium">Enter URL</h3>
@@ -74,7 +73,6 @@ const UrlInput = ({ onUrlSubmit, urlInput, onUrlChange, className = "", isOpen =
         onClick={() => setIsUrlModalOpen(true)} // Changed from onClose(true)
         className={`${STYLE.tab.default} relative block w-full !px-1.5 !py-1 bg-background/30 ${className}`}
         style={{ WebkitAppRegion: "no-drag" }}>
-        <GradientLayer />
         {urlInput.startsWith("https") ? <Shield className="w-4 h-4 opacity-50 text-foreground-secondary flex-shrink-0" /> : <ShieldAlert className="w-4 h-4 opacity-50 text-foreground-secondary flex-shrink-0" />}
         <span className="text-sm text-foreground/60 truncate block relative z-10">{formatedUrlInput(urlInput) || "Search or enter URL"}</span>
       </button>

@@ -3,6 +3,7 @@
 @tailwind utilities;
 
 :root {
+  --sidebar-width: clamp(320px, 30vw, 340px);
   --app-opacity: 0.8;
   --content-opacity: 0.95;
 

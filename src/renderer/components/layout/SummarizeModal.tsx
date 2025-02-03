@@ -228,17 +228,16 @@ const SummarizeModal = ({ isOpen, onClose, content, currentTab }) => {
               damping: 25,
               stiffness: 350,
             }}
-            className="relative w-full max-w-md mr-4 ml-auto h-[calc(100vh-theme(spacing.4)*2)] top-0 bottom-0 rounded-lg shadow-lg overflow-hidden">
-            <GradientLayer />
+            className="bg-background/90 backdrop-blur-lg relative w-full max-w-md mr-4 ml-auto h-[calc(100vh-theme(spacing.4)*2)] top-0 bottom-0 rounded-lg shadow-lg overflow-hidden">
+            
             {/* Header */}
             <div className=" p-4 pb-0 flex flex-col">
               <motion.p
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className=" text-foreground-secondary  text-xs flex gap-2 items-center mb-2 ">
-                <span className="pr-3 pl-2 py-1 bg-blue-500/90 text-white w-max-content overflow-hidden rounded-full border inline-flex items-center gap-2 relative">
-                  <GradientLayer />
+                className=" text-foreground-secondary text-xs flex gap-2 items-center mb-2 ">
+                <span className={`pr-3 pl-2 py-1 ${STYLE.color.bg.primary} text-white w-max-content overflow-hidden rounded-full border-2 shadow-sm border-[rgba(0,0,0,0.5)] inline-flex items-center gap-2 relative`}>
                   <motion.div
                     initial={{ opacity: 0, y: -5 }}
                     animate={{ opacity: 1, y: 0 }}

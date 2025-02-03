@@ -31,10 +31,9 @@ const GradientLayer = ({ color, className = "" }) => {
   return (
     <div
       data-atlas="GradientLayer"
-      className={`absolute inset-0 pointer-events-none backdrop-blur-lg bg-background/30 overflow-hidden ${className}`}>
-      <div className="absolute inset-0 dark:mix-blend-multiply mix-blend-multiply backdrop-blur-2xl from-gray-50/20 to-gray-50/10 dark:from-gray-900/30 dark:to-gray-900/10 bg-gradient-to-r" />
-      <div className="absolute inset-0 dark:mix-blend-multiply mix-blend-multiply backdrop-blur-2xl from-gray-50/20 to-gray-50/10 dark:from-gray-900/30 dark:to-gray-900/10 bg-gradient-to-l" />
-      {color && <div className={`opacity-90 absolute inset-0 dark:mix-blend-multiply mix-blend-lighten z-20 backdrop-blur-2xl ${getColor(color)}`} />}
+      className={`absolute inset-0 pointer-events-none backdrop-blur-lg bg-background/30 overflow-hidden`}>
+      <div className="absolute inset-0 dark:mix-blend-multiply mix-blend-multiply backdrop-blur-lg from-gray-50/20 to-gray-50/10 dark:from-gray-900/30 dark:to-gray-900/10 bg-gradient-to-r" />
+      <div className="absolute inset-0 dark:mix-blend-multiply mix-blend-multiply backdrop-blur-lg from-gray-50/20 to-gray-50/10 dark:from-gray-900/30 dark:to-gray-900/10 bg-gradient-to-l" />
     </div>
   );
 };

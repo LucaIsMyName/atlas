@@ -150,16 +150,9 @@ const TopBar = ({
                     }}
                     className={`
                        w-full relative ${STYLE.tab.default} justify-between min-w-[160px] max-w-[160px]
-                      ${activeTabId === tab.id ? `shadow-sm border-foreground/50` : `opacity-[0.95] hover:opacity-[1] text-foreground-secondary `}
+                      ${activeTabId === tab.id ? `${STYLE.color.bg.primary} text-background dark:text-foreground shadow-sm border-foreground/50` : `opacity-[0.95] hover:opacity-[1] `}
                     `}>
-                    {activeTabId ? (
-                      <></>
-                    ) : (
-                      <>
-                        <GradientLayer />
-                        <GradientLayer />
-                      </>
-                    )}
+                    
                     <motion.div
                       className="flex gap-2 items-center  w-full text-left truncate"
                       layout>
@@ -167,7 +160,7 @@ const TopBar = ({
                         layout
                         className="w-4 h-4 flex items-center justify-center flex-shrink-0">
                         {tab.isLoading ? (
-                          <Loader2 className="w-4 h-4 animate-spin text-foreground/50" />
+                          <Loader2 className="w-4 h-4 animate-spin text-background dark:text-foreground" />
                         ) : (
                           <motion.img
                             initial={{ opacity: 0 }}
@@ -180,7 +173,7 @@ const TopBar = ({
                           />
                         )}
                       </motion.div>
-                      <span className="truncate text-sm">{tab.isLoading ? <span className="text-background">Loading...</span> : tab.title || "New Tab"}</span>
+                      <span className="truncate text-sm">{tab.isLoading ? <span className=" dark:text-foreground">Loading...</span> : tab.title || "New Tab"}</span>
                     </motion.div>
                     <motion.button
                       whileHover={{ scale: 1.1 }}
@@ -189,8 +182,8 @@ const TopBar = ({
                         e.stopPropagation();
                         onCloseTab(tab.id, e);
                       }}
-                      className="opacity-100 group-hover:opacity-100 hover:bg-background-secondary/50 rounded p-0.5 text-foreground-secondary duration-150">
-                      <X className="w-3 h-3" />
+                      className={`opacity-100 group-hover:opacity-100 rounded p-0.5 duration-150 ${activeTabId === tab.id ? "text-background dark:text-foreground ":""}`}>
+                      <X className="w-3 h-3 " />
                     </motion.button>
                   </motion.div>
                 </AnimatePresence>
