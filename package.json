@@ -1,6 +1,6 @@
 {
   "name": "atlas",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "a web browser",
   "main": "src/main/main.cjs",
   "type": "module",
@@ -9,24 +9,24 @@
     "dev": "vite",
     "build": "vite build",
     "build:electron": "vite build -c vite.electron.config.js && cp src/main/preload.cjs dist/main/",
-    "binary": "npm run build && npm run build:electron && electron-builder --mac --x64"
+    "binary": "npm run build && npm run build:electron && electron-builder --mac --universal"
   },
   "build": {
     "appId": "com.atlas.browser",
     "productName": "Atlas",
     "files": [
-      "dist/**/*",
-      "package.json"
+      "dist/**/*"
     ],
     "directories": {
       "buildResources": "assets",
-      "output": "release/${version}",
-      "app": "."
+      "output": "release/${version}"
     },
     "mac": {
       "category": "public.app-category.utilities",
-      "target": ["dmg"]
-    }
+      "target": ["dmg"],
+      "arch": ["x64", "arm64"]
+    },
+    "asar": true
   },
   "author": "LucaIsMyName",
   "license": "ISC",

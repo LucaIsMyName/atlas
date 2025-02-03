@@ -4,9 +4,16 @@ directories:
   output: release/${version}
   buildResources: assets
 files:
-  - dist/**/*
-  - package.json
-  - "!dist/**/*.map"
+  - "dist/**/*"
+  - "package.json"
+  - "!**/.vscode/*"
+  - "!src/*"
+  - "!node_modules/*"
+  - "!release/*"
 mac:
-  target: 
+  target:
     - dmg
+  arch:
+    - x64
+    - arm64
+  category: public.app-category.utilities

@@ -14,17 +14,11 @@ export default defineConfig({
       fileName: () => 'main.cjs'
     },
     rollupOptions: {
-      external: [
-        'electron',
-        'path',
-        'fs/promises',
-        'electron-acrylic-window',
-        'dotenv'
-      ],
+      external: ['electron', 'path', 'fs/promises', 'electron-acrylic-window', 'dotenv'],
       output: {
         format: 'cjs',
-        dir: 'dist/main',
-        entryFileNames: '[name].cjs'
+        entryFileNames: '[name].cjs',
+        dir: 'dist/main'
       }
     },
     emptyOutDir: false

@@ -6,6 +6,13 @@ dotenv.config();
 
 const isDev = process.env.NODE_ENV === 'development';
 
+// Add this helper function
+function resolveHybridPath(relativePath) {
+  return isDev 
+    ? path.join(__dirname, relativePath)
+    : path.join(process.resourcesPath, 'app.asar/dist/main', relativePath);
+}
+
 function createWindow() {
   const mainWindow = new BrowserWindow({
     width: 1200,
@@ -22,7 +29,7 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      preload: path.join(__dirname, isDev ? '../../src/main/preload.cjs' : './preload.cjs'),
+      preload: resolveHybridPath('preload.cjs'),
       webSecurity: true,
       webviewTag: true,
       allowRunningInsecureContent: false,
@@ -30,20 +37,12 @@ function createWindow() {
     },
   });
 
-  // Set CSP
-  mainWindow.webContents.session.webRequest.onHeadersReceived((details, callback) => {
-    callback({
-      responseHeaders: {
-        ...details.responseHeaders,
-        'Content-Security-Policy': ["default-src 'self' 'unsafe-inline' 'unsafe-eval' data: http: https:"]
-      }
-    });
-  });
-
   if (isDev) {
     mainWindow.loadURL('http://localhost:5173');
     mainWindow.webContents.openDevTools();
+    console.log('Loading development server...');
   } else {
+    // Updated path resolution for production
     mainWindow.loadFile(path.join(__dirname, '../index.html'));
   }
 
