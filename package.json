@@ -2,32 +2,30 @@
   "name": "atlas",
   "version": "0.0.4",
   "description": "a web browser",
-  "main": "./src/main/main.js",
+  "main": "src/main/main.cjs",
   "type": "module",
   "scripts": {
     "start": "concurrently -k \"cross-env BROWSER=none npm run dev\" \"wait-on tcp:5173 && cross-env NODE_ENV=development electron .\"",
     "dev": "vite",
-    "electron": "electron .",
-    "build": "vite build && npm run build:electron",
-    "build:electron": "mkdir -p dist/main && cp src/main/preload.cjs dist/main/ && cp src/main/main.js dist/main/",
-    "preview": "vite preview",
-    "package": "electron-builder",
-    "binary": "electron-builder --mac --x64"
+    "build": "vite build",
+    "build:electron": "vite build -c vite.electron.config.js && cp src/main/preload.cjs dist/main/",
+    "binary": "npm run build && npm run build:electron && electron-builder --mac --x64"
   },
   "build": {
     "appId": "com.atlas.browser",
     "productName": "Atlas",
     "files": [
-      "dist/**/*"
+      "dist/**/*",
+      "package.json"
     ],
     "directories": {
-      "output": "release/${version}"
+      "buildResources": "assets",
+      "output": "release/${version}",
+      "app": "."
     },
     "mac": {
       "category": "public.app-category.utilities",
-      "target": [
-        "dmg"
-      ]
+      "target": ["dmg"]
     }
   },
   "author": "LucaIsMyName",

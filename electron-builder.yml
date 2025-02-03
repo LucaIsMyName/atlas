@@ -1,21 +1,12 @@
-appId: "com.atlas.app"
-productName: "atlas"
+appId: com.atlas.browser
+productName: Atlas
 directories:
-  output: "release/${version}"
-  buildResources: "build"
+  output: release/${version}
+  buildResources: assets
 files:
-  - "dist/**/*"
-  - "package.json"
+  - dist/**/*
+  - package.json
   - "!dist/**/*.map"
 mac:
-  artifactName: "${productName}_${version}.${ext}"
   target: 
-    - "dmg"
-win:
-  artifactName: "${productName}_${version}.${ext}"
-  target:
-    - "nsis"
-linux:
-  artifactName: "${productName}_${version}.${ext}"
-  target:
-    - "deb"
+    - dmg

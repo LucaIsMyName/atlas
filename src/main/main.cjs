@@ -1,14 +1,10 @@
-// src/main/main.js
-import { app, BrowserWindow, ipcMain } from 'electron';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import isDev from 'electron-is-dev';
-import dotenv from 'dotenv';
+const { app, BrowserWindow, ipcMain } = require('electron');
+const path = require('path');
+const dotenv = require('dotenv');
+
 dotenv.config();
 
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const isDev = process.env.NODE_ENV === 'development';
 
 function createWindow() {
   const mainWindow = new BrowserWindow({
@@ -20,14 +16,13 @@ function createWindow() {
     title: 'Atlas Browser',
     transparent: true,
     backgroundColor: '#00000000',
-    trafficLightPosition: { x: -100, y: -100 }, // Move system buttons off-screen
+    trafficLightPosition: { x: -100, y: -100 },
     vibrancy: 'under-window',
-    // visualEffectState: 'active',
     titleBarOverlay: "hiddenInset",
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      preload: path.join(__dirname, 'preload.cjs'),  // Changed to .cjs
+      preload: path.join(__dirname, isDev ? '../../src/main/preload.cjs' : './preload.cjs'),
       webSecurity: true,
       webviewTag: true,
       allowRunningInsecureContent: false,
@@ -46,27 +41,11 @@ function createWindow() {
   });
 
   if (isDev) {
-    try {
-      mainWindow.loadURL('http://localhost:5173');
-      mainWindow.webContents.openDevTools();
-      console.log('Loading development server...');
-    } catch (e) {
-      console.error('Failed to load dev server:', e);
-    }
+    mainWindow.loadURL('http://localhost:5173');
+    mainWindow.webContents.openDevTools();
   } else {
-    mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
+    mainWindow.loadFile(path.join(__dirname, '../index.html'));
   }
-
-  // Debug preload script
-  mainWindow.webContents.on('did-finish-load', () => {
-    console.log('Window loaded, checking preload API...');
-    mainWindow.webContents.executeJavaScript(`
-      console.log('Window API check:', {
-        electronAPI: !!window.electronAPI,
-        windowControls: !!window.electronAPI?.windowControls
-      });
-    `);
-  });
 
   return mainWindow;
 }
