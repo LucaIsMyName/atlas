@@ -1,7 +1,8 @@
 import React from "react";
-import { Minus, Square, X } from "lucide-react";
+import { Minus, Square, X, ChevronsLeftRight } from "lucide-react";
+import { STYLE } from "../../config";
 
-const WindowControls = () => {
+const WindowControls = ({className = ""}) => {
   const handleWindowControl = (action: "minimize" | "maximize" | "close") => {
     console.log("Window control clicked:", action);
     console.log("electronAPI available:", !!window.electronAPI);
@@ -18,20 +19,35 @@ const WindowControls = () => {
   return (
     <div
       data-atlas="WindowControls"
-      className="flex items-center gap-2 mr-6"
+      className={`flex items-center gap-2 mr-2 md:mr-4 ${className}`}
       style={{ WebkitAppRegion: "no-drag" }}>
       <button
         onClick={() => handleWindowControl("close")}
-        className="size-3.5 border border-black/20 text-foreground-secondary bg-red-400 hover:bg-red-600 rounded-full transition-colors"
-        title="Close"></button>
+        className={`${STYLE.windowControls.color.close} ${STYLE.windowControls.size} border border-black/20 text-foreground-secondary rounded-full transition-colors flex items-center justify-center`}
+        title="Close">
+        <X
+          strokeWidth={4}
+          className="size-2.5 text-black opacity-0 hover:opacity-[0.5]"
+        />
+      </button>
       <button
         onClick={() => handleWindowControl("minimize")}
-        className="size-3.5 border border-black/20 text-foreground-secondary bg-yellow-500 hover:bg-yellow-600 rounded-full transition-colors"
-        title="Minimize"></button>
+        className={`${STYLE.windowControls.color.min} ${STYLE.windowControls.size} border border-black/20 text-foreground-secondary rounded-full transition-colors flex items-center justify-center`}
+        title="Minimize">
+        <Minus
+          strokeWidth={4}
+          className="size-2.5 text-black opacity-0 hover:opacity-[0.5]"
+        />
+      </button>
       <button
         onClick={() => handleWindowControl("maximize")}
-        className="size-3.5 border border-black/20 text-foreground-secondary bg-green-500 hover:bg-green-600 rounded-full transition-colors"
-        title="Maximize"></button>
+        className={`${STYLE.windowControls.color.max} ${STYLE.windowControls.size} border border-black/20 text-foreground-secondary rounded-full transition-colors flex items-center justify-center`}
+        title="Maximize">
+        <ChevronsLeftRight
+          strokeWidth={4}
+          className="size-2.5 rotate-[-45deg] text-black opacity-0 hover:opacity-[0.5]"
+        />
+      </button>
     </div>
   );
 };

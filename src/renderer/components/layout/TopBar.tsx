@@ -51,7 +51,7 @@ const TopBar = ({
           WebkitAppRegion: "no-drag",
           WebkitUserSelect: "none",
         }}>
-        <div className="pl-2">
+        <div className="ml-2">
           <WindowControls />
         </div>
         <BrowserControls
@@ -67,7 +67,10 @@ const TopBar = ({
             onLayoutChange={onLayoutChange}
             onThemeChange={onThemeChange}>
             <button className="ml-1 p-1.5  rounded text-foreground">
-              <Settings className="w-4 h-4" />
+              <Settings
+                strokeWidth={STYLE.browserControls.strokeWidth}
+                className={`${STYLE.browserControls.size}`}
+              />
             </button>
           </SettingsDropdown>
         </div>
@@ -87,7 +90,10 @@ const TopBar = ({
           <button
             onClick={onNewTab}
             className="p-1 rounded text-foreground">
-            <Plus className="w-4 h-4" />
+            <Plus
+              strokeWidth={STYLE.browserControls.strokeWidth}
+              className={`${STYLE.browserControls.size}`}
+            />
           </button>
           {/* Add a wrapper div with higher z-index */}
         </div>
@@ -98,7 +104,10 @@ const TopBar = ({
           className={`p-1  rounded text-foreground-secondary z-10 mr-2 transition-opacity duration-200 ${isBeginning ? "opacity-30 pointer-events-none" : "opacity-100"}`}
           style={{ WebkitAppRegion: "no-drag" }}
           onClick={() => swiperRef?.slidePrev()}>
-          <ChevronLeft className="w-4 h-4" />
+          <ChevronLeft
+            strokeWidth={STYLE.browserControls.strokeWidth}
+            className={`${STYLE.browserControls.size}`}
+          />
         </button>
 
         <div
@@ -140,16 +149,23 @@ const TopBar = ({
                       onTabClick(tab.id);
                     }}
                     className={`
-                      ${STYLE.tab} w-full relative w-[160px] min-w-[160px] max-w-[160px] justify-between
-                      ${activeTabId === tab.id ? " text-background bg-foreground/90 shadow-sm" : "text-foreground-secondary "}
+                       w-full relative ${STYLE.tab.default} justify-between min-w-[160px] max-w-[160px]
+                      ${activeTabId === tab.id ? `shadow-sm border-foreground/50` : `opacity-[0.95] hover:opacity-[1] text-foreground-secondary `}
                     `}>
-                    <GradientLayer />
+                    {activeTabId ? (
+                      <></>
+                    ) : (
+                      <>
+                        <GradientLayer />
+                        <GradientLayer />
+                      </>
+                    )}
                     <motion.div
                       className="flex gap-2 items-center  w-full text-left truncate"
                       layout>
                       <motion.div
                         layout
-                        className="w-4 h-4 flex-shrink-0">
+                        className="w-4 h-4 flex items-center justify-center flex-shrink-0">
                         {tab.isLoading ? (
                           <Loader2 className="w-4 h-4 animate-spin text-foreground/50" />
                         ) : (
@@ -157,7 +173,7 @@ const TopBar = ({
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             src={getFaviconUrl(tab.url)}
-                            className="w-4 h-4"
+                            className={`${STYLE.tab.favicon.size}`}
                             onError={(e) => {
                               e.target.style.display = "none";
                             }}
@@ -187,7 +203,10 @@ const TopBar = ({
           className={`p-1  rounded text-foreground-secondary z-10 ml-2 transition-opacity duration-200 ${isEnd ? "opacity-30 pointer-events-none" : "opacity-100"}`}
           style={{ WebkitAppRegion: "no-drag" }}
           onClick={() => swiperRef?.slideNext()}>
-          <ChevronRight className="w-4 h-4" />
+          <ChevronRight
+            strokeWidth={STYLE.browserControls.strokeWidth}
+            className={`${STYLE.browserControls.size}`}
+          />
         </button>
       </section>
       {/* Action Buttons */}

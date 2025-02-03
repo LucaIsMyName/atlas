@@ -22,7 +22,6 @@ const createNewTab = (url = 'https://www.google.com', title = 'New Tab') => {
     historyLimit: 50
   };
 
-  // Debug log
   console.log('Created new tab:', tab);
   return tab;
 };
@@ -69,7 +68,6 @@ const InAppBrowser = () => {
     }
   }, []);
 
-  // Initialize tabs
   // Initialize tabs
   const [tabs, setTabs] = useState(() => {
     try {
@@ -246,31 +244,47 @@ const InAppBrowser = () => {
       setUrlInput(webviewRef.current.getURL());
     };
 
-    // Handle new window requests (e.g., target="_blank")
+    // Updated handleNewWindow to open links in new tabs
     const handleNewWindow = (e) => {
       e.preventDefault();
-      const newTab = {
-        id: Date.now().toString(),
-        url: e.url,
-        title: 'Loading...',
-        isLoading: true
-      };
-      setTabs(prev => [...prev, newTab]);
+      const newTab = createNewTab(e.url, 'Loading...');
+      
+      // Update tabs state
+      setTabs(prev => {
+        const updatedTabs = [...prev, newTab];
+        
+        // Save to localStorage
+        try {
+          localStorage.setItem(STORAGE_KEYS.TABS, JSON.stringify(updatedTabs));
+        } catch (error) {
+          console.error('Error saving tabs to localStorage:', error);
+        }
+        
+        return updatedTabs;
+      });
+      
+      // Switch to the new tab
       setActiveTabId(newTab.id);
     };
 
     // Handle regular navigation within the tab
     const handleWillNavigate = (e) => {
-      setTabs(prev => prev.map(tab =>
-        tab.id === activeTabId ? { ...tab, url: e.url, isLoading: true } : tab
-      ));
+      setTabs(prev => prev.map(tab => {
+        if (tab.id === activeTabId) {
+          // Update tab history when navigating
+          return handleTabHistory(tab, e.url);
+        }
+        return tab;
+      }));
     };
 
+    // Add event listeners
     webviewRef.current.addEventListener('did-start-loading', handleLoadStart);
     webviewRef.current.addEventListener('did-stop-loading', handleLoadStop);
     webviewRef.current.addEventListener('new-window', handleNewWindow);
     webviewRef.current.addEventListener('will-navigate', handleWillNavigate);
 
+    // Cleanup event listeners
     return () => {
       if (webviewRef.current) {
         webviewRef.current.removeEventListener('did-start-loading', handleLoadStart);

@@ -1,8 +1,7 @@
 import React from "react";
-import { Plus, X, Settings, Loader2, Search } from "lucide-react";
+import { Plus, X, Settings, Loader2, Search, GripHorizontal } from "lucide-react";
 import { getFaviconUrl } from "../utils/urlHelpers";
 import { motion, AnimatePresence } from "framer-motion";
-import Tab from "./Tab";
 import { ArrowRight, ArrowLeft, RefreshCw } from "lucide-react";
 import { STYLE } from "../../config";
 import WindowControls from "./WindowControls";
@@ -31,10 +30,13 @@ const SideBar = ({
   return (
     <div
       data-atlas="SideBar"
-      className={`w-[clamp(280px,30vw,420px)] h-full flex flex-col ${className}`}>
+      className={`w-[clamp(280px,30vw,420px)] h-full flex flex-col ${className}`}
+      style={{
+        WebkitAppRegion: "drag",
+      }}>
       <div className=" p-0">
         <div className="flex items-center justify-between p-4">
-          <WindowControls />
+          <WindowControls className="" />
           <BrowserControls
             activeTab={activeTabId ? tabs.find((tab) => tab.id === activeTabId) : ""}
             onBack={() => webviewRef.current.goBack()}
@@ -43,18 +45,30 @@ const SideBar = ({
           />
         </div>
         <div className="mx-2">
-          <div className="w-full">
+          <div
+            className="w-full"
+            style={{
+              WebkitAppRegion: "no-drag",
+            }}>
             <UrlInput
               onUrlSubmit={onUrlSubmit}
               urlInput={urlInput}
               onUrlChange={onUrlChange}
               isOpen={isUrlModalOpen}
-              setIsUrlModalOpen={setIsUrlModalOpen} // Pass the setter instead of onClose
+              setIsUrlModalOpen={setIsUrlModalOpen}
               className="block w-full"
             />
           </div>
-          <div className="w-full">
-            <hr className="mt-4 mb-2 h-0 border-t w-full block opacity-10" />
+          <div
+            style={{
+              WebkitAppRegion: "drag",
+            }}
+            className="w-full flex gap-4 items-center mt-2 mb-0 cursor-grab">
+            <hr className=" h-0 border-t w-full block opacity-10" />
+            <div>
+              <GripHorizontal className="size-4 opacity-30" />
+            </div>
+            <hr className="h-0 border-t w-full block opacity-10" />
           </div>
         </div>
       </div>
@@ -64,6 +78,9 @@ const SideBar = ({
         <AnimatePresence mode="popLayout">
           {tabs.map((tab) => (
             <motion.section
+              style={{
+                WebkitAppRegion: "no-drag",
+              }}
               key={tab.id}
               initial={{ opacity: 0, y: -20, height: 0 }}
               animate={{ opacity: 1, y: 0, height: "auto" }}
@@ -79,22 +96,29 @@ const SideBar = ({
               }}
               onClick={() => onTabClick(tab.id)}
               className={`
-          ${STYLE.tab} w-full relative overflow-hidden truncate justify-between
-          ${activeTabId === tab.id ? " text-background bg-foreground/90 shadow-sm" : "text-foreground-secondary "}
-        `}>
-              <GradientLayer />
+                       w-full relative ${STYLE.tab.default} justify-between
+                      ${activeTabId === tab.id ? `shadow-sm border-foreground/50` : `opacity-[0.95] hover:opacity-[1] text-foreground-secondary `}
+                    `}>
+              {activeTabId ? (
+                <></>
+              ) : (
+                <>
+                  <GradientLayer />
+                  <GradientLayer />
+                </>
+              )}
               <motion.div
                 className="flex items-center justify-between w-full gap-2"
                 layout>
-                <div className="w-4 h-4">
+                <div className={`${STYLE.browserControls.size} flex items-center justify-between`}>
                   {tab.isLoading ? (
-                    <Loader2 className="w-4 h-4 animate-spin flex-shrink-0" />
+                    <Loader2 className="w-4 h-4  animate-spin flex-shrink-0" />
                   ) : (
                     <motion.img
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       src={getFaviconUrl(tab.url)}
-                      className="w-4 h-4"
+                      className={`${STYLE.tab.favicon.size}`}
                     />
                   )}
                 </div>
@@ -116,21 +140,28 @@ const SideBar = ({
         </AnimatePresence>
       </div>
       {/* New Tab Button & Settings */}
-      <div className="p-2 flex items-center justify-between gap-4">
+      <div
+        className="p-2 flex items-center justify-between gap-4"
+        style={{
+          WebkitAppRegion: "no-drag",
+        }}>
         <button
           onClick={onNewTab}
-          className={`flex relative ${STYLE.tab} w-full text-left`}>
-          <GradientLayer />
-          <Plus className="w-4 h-4" />
-          <div className="text-sm flex-1">New Tab</div>
+          className={`flex relative ${STYLE.tab.default} dark:bg-sky-900 bg-sky-500 text-background dark:text-foreground  w-full text-left`}>
+          <GradientLayer className="opacity-[0.02] mix-blend-multiply" />
+          <Plus className={`relative z-10${STYLE.browserControls.size}`} />
+          <div className=" relative z-10 text-sm flex-1">New Tab</div>
         </button>
-        <div className="">
+        <div className=" mr-4">
           {/* Settings Button with Dropdown */}
           <SettingsDropdown
             onLayoutChange={onLayoutChange}
             onThemeChange={onThemeChange}>
             <button className="ml-1 p-1.5 rounded text-foreground">
-              <Settings className="w-4 h-4" />
+              <Settings
+                strokeWidth={STYLE.browserControls.strokeWidth}
+                className={`${STYLE.browserControls.size}`}
+              />
             </button>
           </SettingsDropdown>
         </div>

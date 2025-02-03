@@ -31,7 +31,7 @@ const UrlModal = ({ isOpen, onClose, urlInput, onUrlChange, onUrlSubmit }) => {
             <button
               onClick={onClose}
               className="p-1 hover:bg-background-secondary rounded">
-              <X className="w-4 h-4" />
+              <X className={`${STYLE.browserControls.size}`} />
             </button>
           </div>
           <form
@@ -72,11 +72,11 @@ const UrlInput = ({ onUrlSubmit, urlInput, onUrlChange, className = "", isOpen =
       <button
         data-atlas="UrlInput"
         onClick={() => setIsUrlModalOpen(true)} // Changed from onClose(true)
-        className={`${STYLE.tab} relative block w-full !px-2 !py-1.5 bg-background/30 ${className}`}
+        className={`${STYLE.tab.default} relative block w-full !px-1.5 !py-1 bg-background/30 ${className}`}
         style={{ WebkitAppRegion: "no-drag" }}>
         <GradientLayer />
         {urlInput.startsWith("https") ? <Shield className="w-4 h-4 opacity-50 text-foreground-secondary flex-shrink-0" /> : <ShieldAlert className="w-4 h-4 opacity-50 text-foreground-secondary flex-shrink-0" />}
-        <span className="text-sm text-foreground/60 truncate block">{formatedUrlInput(urlInput) || "Search or enter URL"}</span>
+        <span className="text-sm text-foreground/60 truncate block relative z-10">{formatedUrlInput(urlInput) || "Search or enter URL"}</span>
       </button>
 
       <UrlModal

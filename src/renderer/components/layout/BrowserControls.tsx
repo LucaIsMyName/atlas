@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { ArrowLeft, ArrowRight, RefreshCw, Sparkles, Bookmark, Download, Trash2, ExternalLink } from "lucide-react";
+import { ArrowLeft, History, ArrowRight, Info, RefreshCw, GalleryHorizontalEnd, Sparkles, Bookmark, Download, Trash2, ExternalLink, DownloadIcon } from "lucide-react";
 import Tippy from "@tippyjs/react";
 import "tippy.js/animations/scale.css";
 import "tippy.js/dist/tippy.css";
@@ -9,12 +9,12 @@ import { STYLE } from "../../config";
 
 // Storage keys
 const STORAGE_KEYS = {
-  BOOKMARKS: "browser_bookmarks",
+  HISTORY: "browser_history",
   DOWNLOADS: "browser_downloads",
 };
 
-// Bookmark and Download interfaces
-interface Bookmark {
+// History and Download interfaces
+interface HistoryItem {
   id: string;
   url: string;
   title: string;
@@ -32,39 +32,52 @@ interface DownloadItem {
 const BrowserControls = ({ webviewRef, activeTab, onBack, onForward }) => {
   const [isSummarizeOpen, setIsSummarizeOpen] = useState(false);
   const [pageContent, setPageContent] = useState("");
-  const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
+  const [history, setHistory] = useState<HistoryItem[]>([]);
   const [downloads, setDownloads] = useState<DownloadItem[]>([]);
+  const [appInfo, setAppInfo] = useState(null);
 
-  // Bookmark and Download Management
-  const addBookmark = useCallback(
+  useEffect(() => {
+    const loadAppInfo = async () => {
+      try {
+        const response = await fetch("/info.json");
+        const info = await response.json();
+        setAppInfo(info);
+      } catch (error) {
+        console.error("Error loading app info:", error);
+      }
+    };
+    loadAppInfo();
+  }, []);
+  // History and Download Management
+  const addToHistory = useCallback(
     (tab: any) => {
       if (!tab) return;
 
-      const newBookmark: Bookmark = {
+      const newHistoryItem: HistoryItem = {
         id: Date.now().toString(),
         url: tab.url,
         title: tab.title || tab.url,
         dateAdded: Date.now(),
       };
 
-      // Check if bookmark already exists
-      const existingBookmark = bookmarks.find((b) => b.url === newBookmark.url);
-      if (existingBookmark) return;
+      // Check if history item already exists
+      const existingItem = history.find((b) => b.url === newHistoryItem.url);
+      if (existingItem) return;
 
-      const updatedBookmarks = [newBookmark, ...bookmarks].slice(0, 20); // Limit to 20 bookmarks
-      setBookmarks(updatedBookmarks);
-      localStorage.setItem(STORAGE_KEYS.BOOKMARKS, JSON.stringify(updatedBookmarks));
+      const updatedHistory = [newHistoryItem, ...history].slice(0, 20); // Limit to 20 items
+      setHistory(updatedHistory);
+      localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(updatedHistory));
     },
-    [bookmarks]
+    [history]
   );
 
-  const removeBookmark = useCallback(
+  const removeFromHistory = useCallback(
     (id: string) => {
-      const updatedBookmarks = bookmarks.filter((b) => b.id !== id);
-      setBookmarks(updatedBookmarks);
-      localStorage.setItem(STORAGE_KEYS.BOOKMARKS, JSON.stringify(updatedBookmarks));
+      const updatedHistory = history.filter((b) => b.id !== id);
+      setHistory(updatedHistory);
+      localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(updatedHistory));
     },
-    [bookmarks]
+    [history]
   );
 
   const addDownload = useCallback(
@@ -93,12 +106,12 @@ const BrowserControls = ({ webviewRef, activeTab, onBack, onForward }) => {
     [downloads]
   );
 
-  // Load bookmarks and downloads from localStorage on component mount
+  // Load history and downloads from localStorage on component mount
   useEffect(() => {
     try {
-      const storedBookmarks = localStorage.getItem(STORAGE_KEYS.BOOKMARKS);
-      if (storedBookmarks) {
-        setBookmarks(JSON.parse(storedBookmarks));
+      const storedHistory = localStorage.getItem(STORAGE_KEYS.HISTORY);
+      if (storedHistory) {
+        setHistory(JSON.parse(storedHistory));
       }
 
       const storedDownloads = localStorage.getItem(STORAGE_KEYS.DOWNLOADS);
@@ -106,7 +119,7 @@ const BrowserControls = ({ webviewRef, activeTab, onBack, onForward }) => {
         setDownloads(JSON.parse(storedDownloads));
       }
     } catch (error) {
-      console.error("Error loading bookmarks/downloads:", error);
+      console.error("Error loading history/downloads:", error);
     }
   }, []);
 
@@ -166,43 +179,54 @@ const BrowserControls = ({ webviewRef, activeTab, onBack, onForward }) => {
     }
   };
 
-  // Bookmark and Downloads Dropdown Content
-  const bookmarkContent = (
+  // History and Downloads Dropdown Content
+  const historyContent = (
     <div
-      data-atlas="BookmarksDropdown"
-      className={`relative text-foreground z-50 px-2 pb-2 ${STYLE.tab} !block !rounded-lg overflow-hidden`}>
-      <GradientLayer />
+      data-atlas="HistoryDropdown"
+      style={{ WebkitAppRegion: "no-drag" }}
+      className={`relative text-foreground z-50 px-2 pb-2 !block !rounded-lg !overflow-hidden`}>
+      <GradientLayer className="rounded-lg" />
       <div className="relative z-10 space-y-2">
-        <div className="flex items-center justify-between p-2 border-b border-background/20">
-          <span className="text-sm font-medium">Bookmarks</span>
+        <div className="flex items-center gap-2 py-2">
+          <History
+            strokeWidth={STYLE.browserControls.strokeWidth}
+            className="size-4"
+          />
+          <span className="text-sm font-medium">History</span>
         </div>
-        {bookmarks.length === 0 ? (
-          <div className="text-xs text-foreground/50 text-center py-4">No bookmarks saved</div>
+        {history.length === 0 ? (
+          <div className="text-xs text-foreground/50 text-center py-4">No history items</div>
         ) : (
-          <div className="max-h-64 overflow-y-auto">
-            {bookmarks.map((bookmark) => (
+          <div className="max-h-64 overflow-y-auto space-y-2">
+            {history.map((item) => (
               <div
-                key={bookmark.id}
-                className="flex items-center justify-between p-2 hover:bg-background-secondary rounded-md transition-colors group">
+                key={item.id}
+                className={`${STYLE.tab.default} justify-between transition-colors group`}>
                 <div className="flex items-center space-x-2 flex-1 truncate">
                   <a
-                    href={bookmark.url}
+                    href={item.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex-1 truncate text-sm hover:underline">
-                    {bookmark.title}
+                    className="flex-1 truncate text-sm">
+                    {item.title}
                   </a>
                 </div>
-                <div className="flex items-center space-x-1">
+                <div className="flex items-center gap-2">
                   <button
-                    onClick={() => window.open(bookmark.url, "_blank")}
-                    className="text-foreground/50 hover:text-foreground transition-colors">
-                    <ExternalLink className="w-4 h-4" />
+                    onClick={() => window.open(item.url, "_blank")}
+                    className="text-foreground/80 transition-colors">
+                    <ExternalLink
+                      strokeWidth={STYLE.browserControls.strokeWidth}
+                      className="w-3.5 h-3.5"
+                    />
                   </button>
                   <button
-                    onClick={() => removeBookmark(bookmark.id)}
-                    className="text-red-500/50 hover:text-red-500 transition-colors">
-                    <Trash2 className="w-4 h-4" />
+                    onClick={() => removeFromHistory(item.id)}
+                    className="text-red-500/80 dark:text-red-400 hover:text-red-500 transition-colors">
+                    <Trash2
+                      strokeWidth={STYLE.browserControls.strokeWidth}
+                      className="w-3.5 h-3.5"
+                    />
                   </button>
                 </div>
               </div>
@@ -216,14 +240,19 @@ const BrowserControls = ({ webviewRef, activeTab, onBack, onForward }) => {
   const downloadsContent = (
     <div
       data-atlas="DownloadsDropdown"
-      className={`relative text-foreground z-50 px-2 pb-2 ${STYLE.tab} !block !rounded-lg overflow-hidden`}>
-      <GradientLayer />
-      <div className="relative z-10 space-y-2">
-        <div className="flex items-center justify-between p-2 border-b border-background/20">
+      style={{ WebkitAppRegion: "no-drag" }}
+      className={`relative text-foreground z-50 px-2 pb-2 rounded-lg overflow-hidden`}>
+      <GradientLayer className="rounded-lg overflow-hidden" />
+      <div className="relative z-10 space-y-2 ">
+        <div className="flex items-center gap-2 py-2">
+          <DownloadIcon
+            strokeWidth={STYLE.browserControls.strokeWidth}
+            className="size-4"
+          />
           <span className="text-sm font-medium">Downloads</span>
         </div>
         {downloads.length === 0 ? (
-          <div className="text-xs text-foreground/50 text-center py-4">No recent downloads</div>
+          <div className="text-xs text-foreground/50  pb-1">No recent downloads</div>
         ) : (
           <div className="max-h-64 overflow-y-auto">
             {downloads.map((download) => (
@@ -240,17 +269,52 @@ const BrowserControls = ({ webviewRef, activeTab, onBack, onForward }) => {
                       console.log("Open file:", download.path);
                     }}
                     className="text-foreground/50 hover:text-foreground transition-colors">
-                    <ExternalLink className="w-4 h-4" />
+                    <ExternalLink
+                      strokeWidth={STYLE.browserControls.strokeWidth}
+                      className={`${STYLE.browserControls.size}`}
+                    />
                   </button>
                   <button
                     onClick={() => removeDownload(download.id)}
                     className="text-red-500/50 hover:text-red-500 transition-colors">
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2
+                      strokeWidth={STYLE.browserControls.strokeWidth}
+                      className={`${STYLE.browserControls.size}`}
+                    />
                   </button>
                 </div>
               </div>
             ))}
           </div>
+        )}
+      </div>
+    </div>
+  );
+
+  const infoContent = (
+    <div
+      data-atlas="InfoDropdown"
+      style={{ WebkitAppRegion: "no-drag" }}
+      className={`user-select-none relative text-foreground z-50 px-2 pb-2 !block !rounded-lg overflow-hidden`}>
+      <GradientLayer />
+      <div className="relative z-10 space-y-2 mt-2">
+        {appInfo ? (
+          <div className="p-4 space-y-4">
+            <div className="flex items-center justify-center mb-4">
+              <img
+                src={`/${appInfo.logo}`}
+                alt={`${appInfo.appName} logo`}
+                className="w-16 h-16 rounded-lg"
+              />
+            </div>
+            <div className="text-center space-y-1">
+              <h3 className="text-lg font-medium">{appInfo.appName}</h3>
+              <p className="text-xs text-foreground/50">Version {appInfo.version}</p>
+              <p className="text-xs text-foreground/50">{appInfo.description}</p>
+            </div>
+          </div>
+        ) : (
+          <div className="text-xs text-foreground/50 text-center py-4">Loading app info...</div>
         )}
       </div>
     </div>
@@ -264,12 +328,18 @@ const BrowserControls = ({ webviewRef, activeTab, onBack, onForward }) => {
         <button
           onClick={handleBack}
           className={`p-1 ${canGoBack ? "hover:text-foreground/90" : "opacity-50 cursor-not-allowed"}`}>
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft
+            strokeWidth={STYLE.browserControls.strokeWidth}
+            className={`${STYLE.browserControls.size}`}
+          />
         </button>
         <button
           onClick={handleForward}
           className={`p-1 ${canGoForward ? "hover:text-foreground/90" : "opacity-50 cursor-not-allowed"}`}>
-          <ArrowRight className="w-4 h-4" />
+          <ArrowRight
+            strokeWidth={STYLE.browserControls.strokeWidth}
+            className={`${STYLE.browserControls.size}`}
+          />
         </button>
         <button
           onClick={() => {
@@ -278,18 +348,24 @@ const BrowserControls = ({ webviewRef, activeTab, onBack, onForward }) => {
             }
           }}
           className="p-1 hover:text-foreground/90">
-          <RefreshCw className="w-4 h-4" />
+          <RefreshCw
+            strokeWidth={STYLE.browserControls.strokeWidth}
+            className={`${STYLE.browserControls.size}`}
+          />
         </button>
         <button
           onClick={handleSummarize}
           className="p-1 hover:text-foreground/90"
           title="Summarize page">
-          <Sparkles className="w-4 h-4" />
+          <Sparkles
+            strokeWidth={STYLE.browserControls.strokeWidth}
+            className={`${STYLE.browserControls.size}`}
+          />
         </button>
 
-        {/* Bookmarks Button */}
+        {/* History Button */}
         <Tippy
-          content={bookmarkContent}
+          content={historyContent}
           interactive={true}
           arrow={false}
           placement="bottom"
@@ -298,10 +374,13 @@ const BrowserControls = ({ webviewRef, activeTab, onBack, onForward }) => {
           theme="custom"
           className="shadow-lg overflow-hidden min-w-[320px]">
           <button
-            onClick={() => activeTab && addBookmark(activeTab)}
+            onClick={() => activeTab && addToHistory(activeTab)}
             className="p-1 hover:text-foreground/90"
-            title="Bookmarks">
-            <Bookmark className="w-4 h-4" />
+            title="History">
+            <History
+              strokeWidth={STYLE.browserControls.strokeWidth}
+              className={`${STYLE.browserControls.size}`}
+            />
           </button>
         </Tippy>
 
@@ -318,7 +397,30 @@ const BrowserControls = ({ webviewRef, activeTab, onBack, onForward }) => {
           <button
             className="p-1 hover:text-foreground/90"
             title="Downloads">
-            <Download className="w-4 h-4" />
+            <Download
+              strokeWidth={STYLE.browserControls.strokeWidth}
+              className={`${STYLE.browserControls.size}`}
+            />
+          </button>
+        </Tippy>
+
+        {/* Info Button */}
+        <Tippy
+          content={infoContent}
+          interactive={true}
+          arrow={false}
+          placement="bottom"
+          animation="scale"
+          trigger="click"
+          theme="custom"
+          className="shadow-lg overflow-hidden min-w-[280px]">
+          <button
+            className="p-1 hover:text-foreground/90"
+            title="App Info">
+            <Info
+              strokeWidth={STYLE.browserControls.strokeWidth}
+              className={`${STYLE.browserControls.size}`}
+            />
           </button>
         </Tippy>
       </div>

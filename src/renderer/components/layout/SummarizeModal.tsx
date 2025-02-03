@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
-import { X, Loader2, Mail, FileText } from "lucide-react";
+import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
+import { X, Loader2, Mail, FileText, Sparkles } from "lucide-react";
 import GradientLayer from "./GradientLayer";
 import { STYLE } from "../../config";
 import { motion, AnimatePresence } from "framer-motion";
@@ -11,12 +11,25 @@ const SummarizeModal = ({ isOpen, onClose, content, currentTab }) => {
   const [model, setModel] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const modalRef = useRef(null);
+  const hasGeneratedRef = useRef(false); // Track if we've already generated a summary
 
   useEffect(() => {
     if (model) {
       console.log(`Generated summary using model: ${model}`);
     }
   }, [model]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setSummary("");
+      setIsLoading(false);
+      hasGeneratedRef.current = false; // Reset the flag when modal closes
+    } else if (!hasGeneratedRef.current) {
+      // Only generate if we haven't already
+      generateSummary();
+      hasGeneratedRef.current = true; // Mark that we've generated a summary
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -181,6 +194,8 @@ const SummarizeModal = ({ isOpen, onClose, content, currentTab }) => {
     }
   };
 
+  if (!isOpen) return null;
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -216,22 +231,41 @@ const SummarizeModal = ({ isOpen, onClose, content, currentTab }) => {
             className="relative w-full max-w-md mr-4 ml-auto h-[calc(100vh-theme(spacing.4)*2)] top-0 bottom-0 rounded-lg shadow-lg overflow-hidden">
             <GradientLayer />
             {/* Header */}
-            <div className="flex items-start justify-between p-4 pb-0">
-              <motion.h2
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
+            <div className=" p-4 pb-0 flex flex-col">
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className=" text-foreground">
-                <span className="text-foreground-secondary text-sm font-regular">Page Summary for</span>
-                <br />
+                className=" text-foreground-secondary  text-xs flex gap-2 items-center mb-2 ">
+                <span className="pr-3 pl-2 py-1 bg-blue-500/90 text-white w-max-content overflow-hidden rounded-full border inline-flex items-center gap-2 relative">
+                  <GradientLayer />
+                  <motion.div
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.7 }}>
+                    <Sparkles className="size-3.5" />
+                  </motion.div>
+                  <motion.div
+                    initial={{ opacity: 0, y: -7 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.8 }}>
+                    <span className="flex-1 w-full text-xs font-mono  font-regular">AI Summary</span>
+                  </motion.div>
+                </span>
+              </motion.p>
+              <motion.h2
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className=" text-foreground flex gap-2 flex-wrap">
                 <span className="text-lg">{getTabTitle(currentTab)}</span>
               </motion.h2>
               <motion.button
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.1 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
                 onClick={handleClose}
-                className="p-1 hover:bg-background-secondary rounded-md transition-colors">
+                className="absolute top-4 right-4 p-1 ">
                 <X className="w-4 h-4 text-foreground" />
               </motion.button>
             </div>
@@ -242,17 +276,6 @@ const SummarizeModal = ({ isOpen, onClose, content, currentTab }) => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
               className="p-4 min-h-[200px]">
-              {!summary && !isLoading && (
-                <motion.button
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  onClick={generateSummary}
-                  className={`relative px-4 py-2 rounded-md text-sm font-medium ${STYLE.tab} transition-colors`}>
-                  <GradientLayer />
-                  Generate Summary
-                </motion.button>
-              )}
-
               {isLoading && (
                 <motion.div
                   initial={{ opacity: 0 }}
@@ -287,15 +310,14 @@ const SummarizeModal = ({ isOpen, onClose, content, currentTab }) => {
                       </a>
                     </p>
                   )}
-                  <p className="text-sm text-foreground/90 whitespace-pre-wrap">{summary}</p>
+                  <p className="text-sm text-foreground/90 whitespace-pre-wrap user-select-text">{summary}</p>
 
-                  <div className="flex gap-2">
+                  <div className="user-select-none flex gap-4 flex-wrap justify-start mt-4 pt-4 border-t border-foreground/20">
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={handleExport}
-                      className={`${STYLE.tab} relative text-sm border border-border/10 rounded-md hover:bg-background-secondary transition-colors`}>
-                      <GradientLayer />
+                      className={` relative text-xs flex gap-2 items-center hover:bg-background-secondary transition-colors`}>
                       <FileText className="h-4 w-4" />
                       <span>Export as Word</span>
                     </motion.button>
@@ -303,8 +325,7 @@ const SummarizeModal = ({ isOpen, onClose, content, currentTab }) => {
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={handleEmail}
-                      className={`${STYLE.tab} relative text-sm border border-border/10 rounded-md hover:bg-background-secondary transition-colors`}>
-                      <GradientLayer />
+                      className={` relative text-xs flex gap-2 items-center hover:bg-background-secondary transition-colors`}>
                       <Mail className="h-4 w-4" />
                       <span>Share via Email</span>
                     </motion.button>

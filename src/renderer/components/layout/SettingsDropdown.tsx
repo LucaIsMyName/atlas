@@ -76,28 +76,48 @@ const SettingsDropdown = ({ children, onLayoutChange, onThemeChange }) => {
   const content = (
     <div
       data-atlas="SettingsDropdown"
-      className={`relative text-foreground z-50 px-2 pb-2 ${STYLE.tab} !block !rounded-lg overflow-hidden`}>
-      <GradientLayer />
+      className={`relative text-foreground z-50 px-2 pb-2 !block !rounded-lg overflow-hidden`}>
+      <GradientLayer className="rounded-lg" />
       <div className="relative z-10 flex items-center justify-between p-2 rounded-lg transition-colors">
-        <span className="text-sm font-medium ">Theme</span>
+        <span className="text-sm  ">Theme</span>
         <button
           onClick={toggleTheme}
           className="p-1.5 rounded-full">
-          {theme === "light" ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+          {theme === "light" ? (
+            <Moon
+              strokeWidth={STYLE.browserControls.strokeWidth}
+              className={`${STYLE.browserControls.size}`}
+            />
+          ) : (
+            <Sun
+              strokeWidth={STYLE.browserControls.strokeWidth}
+              className={`${STYLE.browserControls.size}`}
+            />
+          )}
         </button>
       </div>
 
-      <div className="flex items-center justify-between p-2 rounded-md transition-colors">
-        <span className="text-sm font-medium ">Layout</span>
+      <div className="relative z-10 flex items-center justify-between p-2 rounded-md transition-colors">
+        <span className="text-sm  ">Layout</span>
         <button
           onClick={toggleLayout}
           className="p-1.5 rounded-full">
-          {layout === "topbar" ? <Sidebar className="w-4 h-4" /> : <LayoutTemplate className="w-4 h-4" />}
+          {layout === "topbar" ? (
+            <Sidebar
+              strokeWidth={STYLE.browserControls.strokeWidth}
+              className={`${STYLE.browserControls.size}`}
+            />
+          ) : (
+            <LayoutTemplate
+              strokeWidth={STYLE.browserControls.strokeWidth}
+              className={`${STYLE.browserControls.size}`}
+            />
+          )}
         </button>
       </div>
 
-      <div className="flex items-center justify-between p-2 rounded-md transition-colors">
-        <span className="text-sm font-medium">Search Engine</span>
+      <div className="relative z-10 flex items-center justify-between p-2 rounded-md transition-colors">
+        <span className="text-sm ">Search Engine</span>
         <select
           value={searchEngine}
           onChange={handleSearchEngineChange}

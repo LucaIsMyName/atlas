@@ -15,6 +15,9 @@ module.exports = {
         inner: 'inset 0 0 10px 5px rgb(var(--foreground) / 0.015)',
         sm: '0 1px 2px 0 rgb(var(--foreground-secondary) / 0.05)',
       },
+      fontFamily: {
+        mono: ['"Geist Mono"', 'monospace'],
+      },
       colors: {
         background: {
           primary: 'rgb(var(--background-primary) / <alpha-value>)',
