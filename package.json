@@ -1,7 +1,7 @@
 {
   "name": "atlas",
   "version": "0.0.5",
-  "description": "a web browser",
+  "description": "The simple browser",
   "main": "src/main/main.cjs",
   "type": "module",
   "scripts": {
