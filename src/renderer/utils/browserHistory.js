@@ -1,28 +1,30 @@
-// browserHistory.js
 class TabHistory {
   constructor(initialUrl, limit = 50) {
-    this.urls = [initialUrl];
-    this.currentIndex = 0;
+    this.urls = initialUrl ? [initialUrl] : [];
+    this.currentIndex = this.urls.length - 1;
     this.limit = limit;
   }
 
   canGoBack() {
-    return this.currentIndex > 0 && this.urls.length > 1;
+    return this.currentIndex > 0;
   }
 
   canGoForward() {
-    return this.currentIndex < this.urls.length - 1 && this.urls.length > 1;
+    return this.currentIndex < this.urls.length - 1;
   }
 
   addUrl(url) {
-    if (url === this.getCurrentUrl()) {
-      return;
-    }
+    // Prevent adding duplicate consecutive URLs
+    if (url === this.getCurrentUrl()) return;
 
+    // Remove all entries after current index before adding new URL
     this.urls = this.urls.slice(0, this.currentIndex + 1);
+    
+    // Add new URL
     this.urls.push(url);
-    this.currentIndex++;
+    this.currentIndex = this.urls.length - 1;
 
+    // Maintain history limit
     if (this.urls.length > this.limit) {
       const overflow = this.urls.length - this.limit;
       this.urls = this.urls.slice(overflow);
@@ -31,23 +33,19 @@ class TabHistory {
   }
 
   goBack() {
-    if (this.canGoBack()) {
-      this.currentIndex--;
-      return this.getCurrentUrl();
-    }
-    return null;
+    if (!this.canGoBack()) return null;
+    this.currentIndex--;
+    return this.getCurrentUrl();
   }
 
   goForward() {
-    if (this.canGoForward()) {
-      this.currentIndex++;
-      return this.getCurrentUrl();
-    }
-    return null;
+    if (!this.canGoForward()) return null;
+    this.currentIndex++;
+    return this.getCurrentUrl();
   }
 
   getCurrentUrl() {
-    return this.urls[this.currentIndex];
+    return this.urls[this.currentIndex] || null;
   }
 
   toJSON() {
@@ -59,106 +57,100 @@ class TabHistory {
   }
 
   static fromJSON(json) {
-    const history = new TabHistory(json.urls[0], json.limit);
+    if (!json || !Array.isArray(json.urls)) {
+      console.error('Invalid history JSON:', json);
+      return new TabHistory(null);
+    }
+    const history = new TabHistory(null);
     history.urls = json.urls;
-    history.currentIndex = json.currentIndex;
+    history.currentIndex = Math.min(json.currentIndex, json.urls.length - 1);
+    history.limit = json.limit;
     return history;
   }
 }
 
-const createNewTab = (url = 'https://www.google.com', title = 'New Tab') => {
-  return {
-    id: Date.now().toString(),
-    url,
-    title,
-    isLoading: false,
-    history: new TabHistory(url),
-  };
-};
+const createNewTab = (url = 'https://www.google.com', title = 'New Tab') => ({
+  id: Date.now().toString(),
+  url,
+  title,
+  isLoading: false,
+  history: new TabHistory(url)
+});
 
 const handleBack = (tabs, tabId, webviewRef) => {
   return tabs.map(tab => {
-    if (tab.id === tabId) {
-      const newUrl = tab.history.goBack();
-      if (newUrl && webviewRef.current) {
-        webviewRef.current.src = newUrl;
-        return {
-          ...tab,
-          url: newUrl,
-          isLoading: true
-        };
-      }
-    }
-    return tab;
+    if (tab.id !== tabId) return tab;
+    
+    const newUrl = tab.history.goBack();
+    if (!newUrl || !webviewRef.current) return tab;
+
+    webviewRef.current.src = newUrl;
+    return { ...tab, url: newUrl, isLoading: true };
   });
 };
 
 const handleForward = (tabs, tabId, webviewRef) => {
   return tabs.map(tab => {
-    if (tab.id === tabId) {
-      const newUrl = tab.history.goForward();
-      if (newUrl && webviewRef.current) {
-        webviewRef.current.src = newUrl;
-        return {
-          ...tab,
-          url: newUrl,
-          isLoading: true
-        };
-      }
-    }
-    return tab;
+    if (tab.id !== tabId) return tab;
+    
+    const newUrl = tab.history.goForward();
+    if (!newUrl || !webviewRef.current) return tab;
+
+    webviewRef.current.src = newUrl;
+    return { ...tab, url: newUrl, isLoading: true };
   });
 };
 
 const handleNavigation = (tabs, tabId, newUrl) => {
   return tabs.map(tab => {
-    if (tab.id === tabId) {
-      tab.history.addUrl(newUrl);
-      return {
-        ...tab,
-        url: newUrl
-      };
-    }
-    return tab;
+    if (tab.id !== tabId) return tab;
+    
+    // Deep clone the tab to prevent state mutations
+    const updatedTab = {
+      ...tab,
+      history: new TabHistory(null)
+    };
+    
+    // Reconstruct history state
+    updatedTab.history.urls = [...tab.history.urls];
+    updatedTab.history.currentIndex = tab.history.currentIndex;
+    updatedTab.history.limit = tab.history.limit;
+    
+    // Add new URL to history
+    updatedTab.history.addUrl(newUrl);
+    
+    return {
+      ...updatedTab,
+      url: newUrl
+    };
   });
 };
 
 const saveTabs = (tabs) => {
-  const tabsForStorage = tabs.map(tab => ({
-    ...tab,
-    history: tab.history.toJSON()
-  }));
-  localStorage.setItem('browser_tabs', JSON.stringify(tabsForStorage));
+  try {
+    const tabsForStorage = tabs.map(tab => ({
+      ...tab,
+      history: tab.history.toJSON()
+    }));
+    localStorage.setItem('browser_tabs', JSON.stringify(tabsForStorage));
+  } catch (error) {
+    console.error('Error saving tabs:', error);
+  }
 };
 
 const loadTabs = () => {
-  const storedTabs = localStorage.getItem('browser_tabs');
-  const storedActiveTabId = localStorage.getItem('browser_active_tab');
-  
-  if (!storedTabs) {
-    const initialTab = createNewTab();
-    localStorage.setItem('browser_active_tab', initialTab.id);
-    return [initialTab];
-  }
-
   try {
+    const storedTabs = localStorage.getItem('browser_tabs');
+    if (!storedTabs) return [createNewTab()];
+
     const parsedTabs = JSON.parse(storedTabs);
-    const tabs = parsedTabs.map(tab => ({
+    return parsedTabs.map(tab => ({
       ...tab,
       history: TabHistory.fromJSON(tab.history)
     }));
-
-    const activeTabExists = tabs.some(tab => tab.id === storedActiveTabId);
-    if (!activeTabExists) {
-      localStorage.setItem('browser_active_tab', tabs[0].id);
-    }
-
-    return tabs;
   } catch (error) {
     console.error('Error loading tabs:', error);
-    const initialTab = createNewTab();
-    localStorage.setItem('browser_active_tab', initialTab.id);
-    return [initialTab];
+    return [createNewTab()];
   }
 };
 

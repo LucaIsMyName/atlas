@@ -1,160 +1,127 @@
-
 import React, { useState, useEffect } from 'react';
 import TopBar from '../layout/TopBar';
 import SideBar from '../layout/SideBar';
 import { formatUrl } from '../utils/urlHelpers';
-import GradientLayer from '../layout/GradientLayer';
-import { 
-  createNewTab,
-  handleBack,
-  handleForward,
-  handleNavigation,
-  saveTabs,
-  loadTabs 
-} from "../../utils/browserHistory"
 
 const STORAGE_KEYS = {
   TABS: 'browser_tabs',
   ACTIVE_TAB: 'browser_active_tab',
   THEME: 'browser_theme',
   LAYOUT: 'browser_layout',
-  SIDEBAR_COLLAPSED: 'browser_sidebar_collapsed' // Add new storage key
-};
-
-
-const handleTabHistory = (tab, newUrl) => {
-  if (tab.url === newUrl) return tab;
-  const newHistory = [...tab.history.slice(0, tab.historyIndex + 1), newUrl]
-    .slice(-tab.historyLimit);
-
-  return {
-    ...tab,
-    history: newHistory,
-    historyIndex: newHistory.length - 1,
-    url: newUrl
-  };
+  SIDEBAR_COLLAPSED: 'browser_sidebar_collapsed'
 };
 
 const InAppBrowser = () => {
-  const webviewRef = React.useRef(null);
+  const [tabs, setTabs] = useState([]);
+  const [activeTabId, setActiveTabId] = useState(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [urlInput, setUrlInput] = useState('');
   const [isUrlModalOpen, setIsUrlModalOpen] = useState(false);
-
-  // Initialize theme and layout
-  const [theme, setTheme] = useState(() =>
-    localStorage.getItem(STORAGE_KEYS.THEME) || 'light'
-  );
-  const [layout, setLayout] = useState(() =>
-    localStorage.getItem(STORAGE_KEYS.LAYOUT) || 'topbar'
-  );
-
-  // Add sidebar collapsed state
+  const [theme, setTheme] = useState(() => localStorage.getItem(STORAGE_KEYS.THEME) || 'light');
+  const [layout, setLayout] = useState(() => localStorage.getItem(STORAGE_KEYS.LAYOUT) || 'topbar');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
-    const stored = localStorage.getItem(STORAGE_KEYS.SIDEBAR_COLLAPSED);
-    return stored ? JSON.parse(stored) : false;
+    return JSON.parse(localStorage.getItem(STORAGE_KEYS.SIDEBAR_COLLAPSED) || 'false');
   });
 
-  // Initialize tabs
-  const [tabs, setTabs] = useState(() => loadTabs());
-
-
-  const [activeTabId, setActiveTabId] = useState(() => {
-    try {
-      return localStorage.getItem(STORAGE_KEYS.ACTIVE_TAB) || tabs[0]?.id;
-    } catch {
-      return tabs[0]?.id;
-    }
-  });
-
-  // Save sidebar state to localStorage
+  // Initialize tabs using Electron's API
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.SIDEBAR_COLLAPSED, JSON.stringify(isSidebarCollapsed));
-  }, [isSidebarCollapsed]);
+    const initializeTabs = async () => {
+      const savedTabsData = localStorage.getItem(STORAGE_KEYS.TABS);
+      const tabsData = savedTabsData ? JSON.parse(savedTabsData) : [{
+        id: Date.now().toString(),
+        url: 'https://www.google.com',
+        title: 'New Tab'
+      }];
 
-  // Save tabs and active tab
-  useEffect(() => {
-    saveTabs(tabs);
-    localStorage.setItem(STORAGE_KEYS.ACTIVE_TAB, activeTabId);
-  }, [tabs, activeTabId]);
+      const initializedTabs = await Promise.all(tabsData.map(async (tab) => {
+        await window.tabAPI.createTab({ tabId: tab.id, url: tab.url });
+        return tab;
+      }));
 
-  // Theme effect
-  useEffect(() => {
-    const savedTheme = localStorage.getItem(STORAGE_KEYS.THEME);
-    if (savedTheme) {
-      setTheme(savedTheme);
-      if (savedTheme === 'dark') {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
-    }
+      setTabs(initializedTabs);
+      const activeId = localStorage.getItem(STORAGE_KEYS.ACTIVE_TAB) || initializedTabs[0].id;
+      setActiveTabId(activeId);
+      await window.tabAPI.switchTab(activeId);
+    };
+
+    initializeTabs();
   }, []);
 
-  // Layout change handler
+  // Handle tab events from main process
   useEffect(() => {
-    const handleStorageChange = (e) => {
-      if (e.key === STORAGE_KEYS.LAYOUT) {
-        setLayout(e.newValue || 'topbar');
+    const handleTabLoading = (event) => {
+      const { tabId, loading } = event.detail;
+      setTabs(prev => prev.map(tab =>
+        tab.id === tabId ? { ...tab, isLoading: loading } : tab
+      ));
+    };
+
+    const handleTabTitleUpdate = (event) => {
+      const { tabId, title, url } = event.detail;
+      setTabs(prev => prev.map(tab =>
+        tab.id === tabId ? { ...tab, title, url } : tab
+      ));
+      if (tabId === activeTabId) {
+        setUrlInput(url);
       }
     };
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
 
-  const activeTab = tabs.find(tab => tab.id === activeTabId);
+    window.addEventListener('tab-loading', handleTabLoading);
+    window.addEventListener('tab-title-updated', handleTabTitleUpdate);
+    return () => {
+      window.removeEventListener('tab-loading', handleTabLoading);
+      window.removeEventListener('tab-title-updated', handleTabTitleUpdate);
+    };
+  }, [activeTabId]);
 
-  // Handler for toggling sidebar
-  const handleToggleSidebar = () => {
-    setIsSidebarCollapsed(prev => !prev);
-  };
 
   // Navigation handlers
-  const handleBack = (tabId) => {
-    setTabs(prev => handleBack(prev, tabId, webviewRef));
-  };
-  
-  const handleForward = (tabId) => {
-    setTabs(prev => handleForward(prev, tabId, webviewRef));
-  };
-  
-  const handleWillNavigate = (e) => {
-    setTabs(prev => handleNavigation(prev, activeTabId, e.url));
+  const handleBack = async (tabId) => {
+    await window.tabAPI.goBack(tabId);
   };
 
-  const handleNewTab = () => {
-    const newTab = createNewTab();
+  const handleForward = async (tabId) => {
+    await window.tabAPI.goForward(tabId);
+  };
+
+  const handleNewTab = async () => {
+    const newTab = {
+      id: Date.now().toString(),
+      url: 'https://www.google.com',
+      title: 'New Tab',
+      isLoading: true
+    };
+
+    await window.tabAPI.createTab({ tabId: newTab.id, url: newTab.url });
     setTabs(prev => [...prev, newTab]);
     setActiveTabId(newTab.id);
+    await window.tabAPI.switchTab(newTab.id);
   };
 
-  const handleCloseTab = (tabId, e) => {
+  const handleCloseTab = async (tabId, e) => {
     e.stopPropagation();
+    await window.tabAPI.closeTab(tabId);
+
     setTabs(prev => {
       const newTabs = prev.filter(tab => tab.id !== tabId);
       if (tabId === activeTabId && newTabs.length > 0) {
-        setActiveTabId(newTabs[newTabs.length - 1].id);
+        const newActiveId = newTabs[newTabs.length - 1].id;
+        setActiveTabId(newActiveId);
+        window.tabAPI.switchTab(newActiveId);
       }
-      return newTabs.length > 0 ? newTabs : [
-        createNewTab('https://www.google.com', 'Google')
-      ];
+      return newTabs;
     });
   };
 
-  const handleTabClick = (tabId) => {
+  const handleTabClick = async (tabId) => {
     setActiveTabId(tabId);
+    await window.tabAPI.switchTab(tabId);
   };
 
-  const handleUrlSubmit = (e) => {
+  const handleUrlSubmit = async (e) => {
     e.preventDefault();
-    if (!webviewRef.current) return;
-
     const formattedUrl = formatUrl(urlInput);
-    setTabs(prev => prev.map(tab =>
-      tab.id === activeTabId ? { ...tab, url: formattedUrl, isLoading: true } : tab
-    ));
-
-    webviewRef.current.src = formattedUrl;
+    await window.tabAPI.navigateTo({ tabId: activeTabId, url: formattedUrl });
   };
 
   const handleThemeChange = (newTheme) => {
@@ -172,50 +139,9 @@ const InAppBrowser = () => {
     localStorage.setItem(STORAGE_KEYS.LAYOUT, newLayout);
   };
 
-  // Webview event handlers
   useEffect(() => {
-    if (!webviewRef.current) return;
-
-    const handleLoadStart = () => {
-      setTabs(prev => prev.map(tab =>
-        tab.id === activeTabId ? { ...tab, isLoading: true } : tab
-      ));
-    };
-
-    const handleLoadStop = () => {
-      if (!webviewRef.current) return;
-      setTabs(prev => prev.map(tab =>
-        tab.id === activeTabId ? {
-          ...tab,
-          isLoading: false,
-          title: webviewRef.current.getTitle() || tab.url,
-          url: webviewRef.current.getURL()
-        } : tab
-      ));
-      setUrlInput(webviewRef.current.getURL());
-    };
-
-    const handleNewWindow = (e) => {
-      e.preventDefault();
-      const newTab = createNewTab(e.url, 'Loading...');
-      setTabs(prev => [...prev, newTab]);
-      setActiveTabId(newTab.id);
-    };
-
-    webviewRef.current.addEventListener('did-start-loading', handleLoadStart);
-    webviewRef.current.addEventListener('did-stop-loading', handleLoadStop);
-    webviewRef.current.addEventListener('new-window', handleNewWindow);
-    webviewRef.current.addEventListener('will-navigate', handleWillNavigate);
-
-    return () => {
-      if (webviewRef.current) {
-        webviewRef.current.removeEventListener('did-start-loading', handleLoadStart);
-        webviewRef.current.removeEventListener('did-stop-loading', handleLoadStop);
-        webviewRef.current.removeEventListener('new-window', handleNewWindow);
-        webviewRef.current.removeEventListener('will-navigate', handleWillNavigate);
-      }
-    };
-  }, [activeTabId]);
+    window.tabAPI.updateLayout(layout, isSidebarCollapsed);
+  }, [layout, isSidebarCollapsed]);
 
   // Navigation props
   const navigationProps = {
@@ -231,32 +157,33 @@ const InAppBrowser = () => {
     onThemeChange: handleThemeChange,
     onLayoutChange: handleLayoutChange,
     isUrlModalOpen,
-    webviewRef,
     setIsUrlModalOpen,
     onBack: handleBack,
     onForward: handleForward,
-    activeTab,
+    activeTab: tabs.find(tab => tab.id === activeTabId),
     isSidebarCollapsed,
-    onToggleSidebar: handleToggleSidebar
+    onToggleSidebar: () => setIsSidebarCollapsed(prev => !prev)
   };
 
   // Keyboard shortcuts
   useEffect(() => {
+    const currentTab = tabs.find(tab => tab.id === activeTabId);
+    
     const handleKeyboard = (e) => {
       const isCmdOrCtrl = e.metaKey || e.ctrlKey;
       if (e.altKey) {
         switch (e.key) {
           case 'ArrowLeft':
             e.preventDefault();
-            if (activeTab) handleBack(activeTab.id);
+            if (currentTab) handleBack(currentTab.id);
             break;
           case 'ArrowRight':
             e.preventDefault();
-            if (activeTab) handleForward(activeTab.id);
+            if (currentTab) handleForward(currentTab.id);
             break;
         }
       }
-
+  
       if (isCmdOrCtrl) {
         switch (e.key) {
           case 't':
@@ -270,72 +197,42 @@ const InAppBrowser = () => {
             break;
           case 'y':
             e.preventDefault();
-            const newLayout = layout === 'topbar' ? 'sidebar' : 'topbar';
-            handleLayoutChange(newLayout);
+            handleLayoutChange(layout === 'topbar' ? 'sidebar' : 'topbar');
             break;
-          case '\\': // Add shortcut for toggling sidebar
+          case '\\':
             e.preventDefault();
-            handleToggleSidebar();
-            break;
-          default:
+            setIsSidebarCollapsed(prev => !prev);
             break;
         }
       }
     };
-
+  
     window.addEventListener('keydown', handleKeyboard);
     return () => window.removeEventListener('keydown', handleKeyboard);
-  }, [layout, activeTab, handleToggleSidebar]);
+  }, [layout, activeTabId, tabs]);
 
   // Calculate webview container class based on sidebar state
   const getWebviewContainerClass = () => {
     if (layout === 'sidebar') {
-      return isSidebarCollapsed 
-        ? " w-[calc(100%-3rem)]" 
+      return isSidebarCollapsed
+        ? " w-[calc(100%-3rem)]"
         : "w-[calc(100%-var(--sidebar-width))]";
     }
     return "";
   };
 
   return (
-    <div data-atlas="Browser" className="h-screen flex relative border-[0.5px] border-foreground/20 rounded-lg  overflow-hidden bg-background backdrop-blur-lg">
+    <div data-atlas="Browser" className="h-screen flex relative border-[0.5px] border-foreground/20 rounded-lg overflow-hidden bg-background backdrop-blur-lg">
       {layout === 'sidebar' ? (
         <div className="flex flex-1 h-full z-10 relative">
           <SideBar {...navigationProps} classname="z-20 relative" />
           <div className={`flex-1 transition-all duration-300 ${getWebviewContainerClass()}`}>
-            <div
-              className="flex flex-1 w-full items-center px-3"
-              style={{ WebkitAppRegion: 'drag' }}
-            />
-            <div className="flex-1 w-full h-screen rounded-lg overflow-hidden shadow-inner">
-              {activeTab && (
-                <webview
-                  ref={webviewRef}
-                  src={activeTab.url}
-                  className="bg-white z-0 relative w-full mr-1 max-w-[calc(100%-theme(spacing.1)*2)] h-[calc(100vh-theme(spacing.2)*2)] top-2 rounded-lg overflow-hidden"
-                  style={{ zIndex: 1 }}
-                  webpreferences="nodeIntegration=false, contextIsolation=true"
-                  allowpopups="true"
-                />
-              )}
-            </div>
+            <div className="flex flex-1 w-full items-center px-3" style={{ WebkitAppRegion: 'drag' }} />
           </div>
         </div>
       ) : (
         <div className="flex flex-col items-between shadow-inner w-full h-full pb-1">
           <TopBar {...navigationProps} className="z-10 relative" />
-          <div className="z-20 relative flex-1">
-            {activeTab && (
-              <webview
-                ref={webviewRef}
-                src={activeTab.url}
-                className="bg-white z-0 relative w-full ml-1 max-w-[calc(100%-theme(spacing.4)/2)] h-full rounded-lg overflow-hidden"
-                style={{ zIndex: 1 }}
-                webpreferences="nodeIntegration=false, contextIsolation=true"
-                allowpopups="true"
-              />
-            )}
-          </div>
         </div>
       )}
     </div>
