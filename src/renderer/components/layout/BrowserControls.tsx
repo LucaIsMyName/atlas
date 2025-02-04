@@ -124,16 +124,16 @@ const BrowserControls = ({ webviewRef, activeTab, onBack, onForward }) => {
   }, []);
 
   // Canary vars for navigation
-  const canGoBack = activeTab && activeTab.history && activeTab.history.length > 0 && activeTab.historyIndex > 0;
+  const canGoBack = activeTab?.history?.canGoBack?.() || false;
 
-  const canGoForward = activeTab && activeTab.history && activeTab.history.length > 0 && activeTab.historyIndex < activeTab.history.length - 1;
+  const canGoForward = activeTab?.history?.canGoForward?.() || false;
 
   const handleBack = () => {
     if (canGoBack && activeTab) {
       onBack(activeTab.id);
     }
   };
-
+  
   const handleForward = () => {
     if (canGoForward && activeTab) {
       onForward(activeTab.id);

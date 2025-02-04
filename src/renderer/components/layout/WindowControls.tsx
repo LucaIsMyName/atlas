@@ -16,6 +16,8 @@ const WindowControls = ({className = ""}) => {
     }
   };
 
+  
+
   return (
     <div
       data-atlas="WindowControls"

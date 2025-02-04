@@ -37,6 +37,10 @@
   --foreground-accent: 96 165 250;
 }
 
+*:not(webview) {
+  letter-spacing: 0.005em;
+}
+
 webview {
   display: inline-flex !important;
   width: 100%;
@@ -76,10 +80,8 @@ input[type="color"] {
 .tippy-box[data-theme~="custom"] {
   background-color: transparent;
   padding: 0;
-
 }
 
 .tippy-box[data-theme~="custom"] .tippy-content {
   padding: 0;
-
 }

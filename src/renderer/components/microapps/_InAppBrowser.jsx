@@ -4,14 +4,6 @@ import TopBar from '../layout/TopBar';
 import SideBar from '../layout/SideBar';
 import { formatUrl } from '../utils/urlHelpers';
 import GradientLayer from '../layout/GradientLayer';
-import { 
-  createNewTab,
-  handleBack,
-  handleForward,
-  handleNavigation,
-  saveTabs,
-  loadTabs 
-} from "../../utils/browserHistory"
 
 const STORAGE_KEYS = {
   TABS: 'browser_tabs',
@@ -21,6 +13,20 @@ const STORAGE_KEYS = {
   SIDEBAR_COLLAPSED: 'browser_sidebar_collapsed' // Add new storage key
 };
 
+const createNewTab = (url = 'https://www.google.com', title = 'New Tab') => {
+  const tab = {
+    id: Date.now().toString(),
+    url,
+    title,
+    isLoading: false,
+    history: [url],
+    historyIndex: 0,
+    historyLimit: 50
+  };
+
+  console.log('Created new tab:', tab);
+  return tab;
+};
 
 const handleTabHistory = (tab, newUrl) => {
   if (tab.url === newUrl) return tab;
@@ -56,8 +62,24 @@ const InAppBrowser = () => {
   });
 
   // Initialize tabs
-  const [tabs, setTabs] = useState(() => loadTabs());
-
+  const [tabs, setTabs] = useState(() => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEYS.TABS);
+      if (stored) {
+        const parsedTabs = JSON.parse(stored);
+        return parsedTabs.map(tab => ({
+          ...tab,
+          history: tab.history || [tab.url],
+          historyIndex: tab.historyIndex || 0,
+          historyLimit: tab.historyLimit || 50
+        }));
+      }
+      return [createNewTab('https://www.google.com', 'Google')];
+    } catch (error) {
+      console.error('Error loading tabs from localStorage:', error);
+      return [createNewTab('https://www.google.com', 'Google')];
+    }
+  });
 
   const [activeTabId, setActiveTabId] = useState(() => {
     try {
@@ -74,8 +96,12 @@ const InAppBrowser = () => {
 
   // Save tabs and active tab
   useEffect(() => {
-    saveTabs(tabs);
-    localStorage.setItem(STORAGE_KEYS.ACTIVE_TAB, activeTabId);
+    try {
+      localStorage.setItem(STORAGE_KEYS.TABS, JSON.stringify(tabs));
+      localStorage.setItem(STORAGE_KEYS.ACTIVE_TAB, activeTabId);
+    } catch (error) {
+      console.error('Error saving to localStorage:', error);
+    }
   }, [tabs, activeTabId]);
 
   // Theme effect
@@ -111,15 +137,43 @@ const InAppBrowser = () => {
 
   // Navigation handlers
   const handleBack = (tabId) => {
-    setTabs(prev => handleBack(prev, tabId, webviewRef));
+    console.log('Handling back navigation for tab:', tabId);
+    setTabs(prev => prev.map(tab => {
+      if (tab.id === tabId && tab.historyIndex > 0) {
+        const newIndex = tab.historyIndex - 1;
+        const newUrl = tab.history[newIndex];
+        if (webviewRef.current) {
+          webviewRef.current.src = newUrl;
+        }
+        return {
+          ...tab,
+          historyIndex: newIndex,
+          url: newUrl,
+          isLoading: true
+        };
+      }
+      return tab;
+    }));
   };
-  
+
   const handleForward = (tabId) => {
-    setTabs(prev => handleForward(prev, tabId, webviewRef));
-  };
-  
-  const handleWillNavigate = (e) => {
-    setTabs(prev => handleNavigation(prev, activeTabId, e.url));
+    console.log('Handling forward navigation for tab:', tabId);
+    setTabs(prev => prev.map(tab => {
+      if (tab.id === tabId && tab.historyIndex < tab.history.length - 1) {
+        const newIndex = tab.historyIndex + 1;
+        const newUrl = tab.history[newIndex];
+        if (webviewRef.current) {
+          webviewRef.current.src = newUrl;
+        }
+        return {
+          ...tab,
+          historyIndex: newIndex,
+          url: newUrl,
+          isLoading: true
+        };
+      }
+      return tab;
+    }));
   };
 
   const handleNewTab = () => {
@@ -200,6 +254,15 @@ const InAppBrowser = () => {
       const newTab = createNewTab(e.url, 'Loading...');
       setTabs(prev => [...prev, newTab]);
       setActiveTabId(newTab.id);
+    };
+
+    const handleWillNavigate = (e) => {
+      setTabs(prev => prev.map(tab => {
+        if (tab.id === activeTabId) {
+          return handleTabHistory(tab, e.url);
+        }
+        return tab;
+      }));
     };
 
     webviewRef.current.addEventListener('did-start-loading', handleLoadStart);
